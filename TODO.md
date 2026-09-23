@@ -112,6 +112,6 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - **Worked:** the policy logic (settings, debounce, WiFi state machine, JSON) is host-tested, so the
   hardware glue in `src/` stays thin.
 - **Didn't:** the WiFi stack costs +29 % flash. It fits only because T-01 chose `min_spiffs.csv`.
-- **Backlog:** 3 rows closed (settings, WiFi, web UI/API, OTA; 4 rows in total). 2 rows added (OTA auth
+- **Backlog:** 4 rows closed (settings, WiFi, web UI/API, OTA). 2 rows added (OTA auth
   decision, hardware bring-up). Open: 3, and all of them need the user.
 - **Next:** stop. The remaining work needs the user: flash the hardware, place the strip, decide on auth.
