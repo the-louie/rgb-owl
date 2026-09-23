@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** Sprint 03, in progress (opened 2026-09-23)
+**Active sprint:** — (Sprint 03 done 2026-09-23; remaining rows need the user)
 **Current ticket:** —
 **Last completed:** T-18 (`done` — commit `893b1e6`)
 
@@ -54,7 +54,7 @@ On hardware, after the boot walk the owl cycles through 7 effects, 60 s each, wi
 | T-11 | Owl eyes (glow + random blink, `EYES[]`) | 2h | — | done | SPEC §Effects 5; Landed in `d424447` |
 | T-12 | Auto-cycle scheduler + crossfade (60 s / 2 s, adjustable) + native tests | 3h | — | done | SPEC §Behaviour; Landed in `74b8910` |
 
-## Sprint 03 — connectivity
+## Sprint 03 — connectivity (done 2026-09-23)
 
 **Goal:** Control the owl from a phone. Settings survive power loss, and firmware updates go over WiFi.
 **Demo:** gate passes (settings/debounce tests). On hardware: first boot opens the `Owl-Setup`
@@ -79,7 +79,8 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - ~~**Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-16/T-17):** `src/http.cpp` (`/`, `/api/state`, `/api/effects`), `web/index.html`; headless-Chrome smoke test against a mock API: 7 effect buttons, 3 POSTs, no JS errors, no horizontal scroll at 390 px. Original row kept for the record: Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour (SPEC §Connectivity)
 - ~~**OTA: ArduinoOTA + `.bin` upload endpoint**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-18):** `src/ota.cpp` (`ArduinoOTA.begin`, `/update` handler), `[env:s3zero-ota]` in `platformio.ini`. Original row kept for the record: OTA: ArduinoOTA + `.bin` upload endpoint (SPEC §Connectivity)
 - **OTA / web UI authentication** (needs user decision: none (current) vs OTA password vs HTTP basic auth; anyone on the home LAN can currently reflash the owl)
-- **Real layout values in `layout.h`** (blocked: user must place the strip first)
+- **Real layout values in `layout.h`** (blocked: user must place the strip first; use the boot column walk to check)
+- **Hardware bring-up + effect tuning** (needs flashed hardware: 3.3 V data reliability, WiFi/RMT flicker, effect speeds and colours, power cap)
 
 ## Retros
 
@@ -103,3 +104,14 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - **Backlog:** 0 closed, 0 added. The 4 open rows are verified still open (no WiFi/NVS/OTA code in `src/`)
   and scheduled as Sprint 03. `layout.h` values are still blocked on the user.
 - **Next:** Sprint 03 connectivity. The breathing hue needs a setter reachable from settings.
+
+### Sprint 03 (2026-09-23)
+
+- **Demo:** 44 native tests pass. The s3zero and s3zero-ota builds use RAM 17.3 % and flash 66.1 %.
+  The web UI was checked in headless Chrome against a mock API. WiFi, portal, NVS and OTA are **unverified on hardware**.
+- **Worked:** the policy logic (settings, debounce, WiFi state machine, JSON) is host-tested, so the
+  hardware glue in `src/` stays thin.
+- **Didn't:** the WiFi stack costs +29 % flash. It fits only because T-01 chose `min_spiffs.csv`.
+- **Backlog:** 3 rows closed (settings, WiFi, web UI/API, OTA; 4 rows in total). 2 rows added (OTA auth
+  decision, hardware bring-up). Open: 3, and all of them need the user.
+- **Next:** stop. The remaining work needs the user: flash the hardware, place the strip, decide on auth.
