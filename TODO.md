@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 03, in progress (opened 2026-09-23)
-**Current ticket:** T-16 (`todo` — HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects`)
+**Current ticket:** T-16 (`in-progress` — HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects`)
 **Last completed:** T-15 (`done` — commit `5ac9b51`)
 
 ## Conventions
@@ -66,7 +66,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 | T-13 | Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests | 2h | — | done | Backlog row 1; Landed in `507e43e` |
 | T-14 | NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue | 3h | T-13 | done | Backlog row 1; Landed in `6e13b03` |
 | T-15 | WiFi: WiFiManager non-blocking portal `Owl-Setup`, STA, hostname + mDNS `owl.local` | 3h | — | done | Backlog row 2; Landed in `5ac9b51` |
-| T-16 | HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects` | 2h | T-14, T-15 | todo | Backlog row 3 |
+| T-16 | HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects` | 2h | T-14, T-15 | in-progress | Backlog row 3 |
 | T-17 | Web UI: embedded single page using the API | 3h | T-16 | todo | Backlog row 3 |
 | T-18 | OTA: ArduinoOTA (`owl.local`) + `POST /update` .bin upload | 2h | T-15, T-16 | todo | Backlog row 4 |
 
