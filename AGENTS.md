@@ -174,4 +174,5 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | EVENT    | T-15: WiFi stack raises flash to 65.3% of 1.9 MB slot (default.csv 1.25 MB would not fit)
 2026-09-23 | OPEN     | OTA/web auth: none for now (anyone on home LAN can reflash); needs user decision
 2026-09-23 | EVENT    | Sprints 01-03 done (18 tickets): 7 effects, auto-cycle, NVS, WiFi portal, web UI, OTA; 44 native tests; hardware unverified
+2026-09-23 | CLOSED   | OTA auth (user decision): password for ArduinoOTA + web /update, web UI open; single source [owl] ota_password in platformio.ini
 ```

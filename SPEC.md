@@ -76,7 +76,8 @@ Palette bias: pastel (desaturated) colours where the effect allows.
     or 400 `{"error"}`
   - `GET /api/effects` → effect names in cycle order
 - OTA: ArduinoOTA (`pio run -e s3zero-ota -t upload`, espota to `owl.local`) and `.bin` upload in
-  the web UI (`POST /update`, multipart). No authentication (open item).
+  the web UI (`POST /update`, multipart, `password` field before the file). Both require the OTA
+  password (`[owl] ota_password` in `platformio.ini`); the rest of the web UI is open.
 
 ## Software
 

@@ -13,11 +13,16 @@
 namespace owl::ota {
 
 static bool started = false;
+static bool rejected = false;  // current web upload has a wrong password
 
 static void blankLeds() { FastLED.clear(true); }  // the render loop is stalled while flashing
 
 static void uploadDone() {
     WebServer& web = http::server();
+    if (rejected) {
+        web.send(401, "application/json", "{\"error\":\"wrong password\"}");
+        return;
+    }
     bool ok = !Update.hasError();
     web.send(ok ? 200 : 500, "application/json",
              ok ? "{\"ok\":true}" : "{\"error\":\"update failed\"}");
@@ -31,18 +36,24 @@ static void uploadChunk() {
     HTTPUpload& u = http::server().upload();
     switch (u.status) {
         case UPLOAD_FILE_START:
+            // the password field precedes the file in the multipart body
+            rejected = http::server().arg("password") != OWL_OTA_PASSWORD;
+            if (rejected) {
+                Serial.println("ota: web upload rejected, wrong password");
+                break;
+            }
             Serial.printf("ota: web upload %s\n", u.filename.c_str());
             blankLeds();
             if (!Update.begin(UPDATE_SIZE_UNKNOWN)) Update.printError(Serial);
             break;
         case UPLOAD_FILE_WRITE:
-            if (Update.write(u.buf, u.currentSize) != u.currentSize) Update.printError(Serial);
+            if (!rejected && Update.write(u.buf, u.currentSize) != u.currentSize) Update.printError(Serial);
             break;
         case UPLOAD_FILE_END:
-            if (!Update.end(true)) Update.printError(Serial);
+            if (!rejected && !Update.end(true)) Update.printError(Serial);
             break;
         case UPLOAD_FILE_ABORTED:
-            Update.abort();
+            if (!rejected) Update.abort();
             break;
     }
 }
@@ -50,6 +61,7 @@ static void uploadChunk() {
 void begin() {
     http::server().on("/update", HTTP_POST, uploadDone, uploadChunk);
     ArduinoOTA.setHostname(config::HOSTNAME);
+    ArduinoOTA.setPassword(OWL_OTA_PASSWORD);
     ArduinoOTA.setMdnsEnabled(false);  // net.cpp owns mDNS
     ArduinoOTA.onStart(blankLeds);
     ArduinoOTA.onError([](ota_error_t e) { Serial.printf("ota: error %u\n", unsigned(e)); });

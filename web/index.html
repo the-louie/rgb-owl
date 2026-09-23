@@ -50,6 +50,7 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 <section>
 <h2>Firmware</h2>
 <input type="file" id="bin" accept=".bin">
+<input type="password" id="pw" placeholder="OTA password" autocomplete="current-password">
 <button id="upd">Upload</button>
 <label><b id="updV"></b></label>
 </section>
@@ -127,11 +128,12 @@ $('upd').onclick = async () => {
   const f = $('bin').files[0];
   if (!f) return;
   const fd = new FormData();
+  fd.append('password', $('pw').value);
   fd.append('firmware', f);
   $('updV').textContent = 'Uploading…';
   try {
     const r = await fetch('/update', { method: 'POST', body: fd });
-    $('updV').textContent = r.ok ? 'Done, restarting…' : 'Update failed';
+    $('updV').textContent = r.ok ? 'Done, restarting…' : r.status === 401 ? 'Wrong password' : 'Update failed';
   } catch (e) {
     $('updV').textContent = 'Update failed';
   }
