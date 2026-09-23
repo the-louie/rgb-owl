@@ -71,7 +71,7 @@ in `SPEC.md`, and it is the source of truth for behaviour.
 Subclass `owl::Effect` (`src/effect.h`), draw with `Canvas::set(x, y, c)` into the buffer
 passed to `render()` (never into `leds::strip` directly, because crossfade renders two
 effects), use `Frame::t` / `Frame::dt` (speed-scaled ms) instead of `millis()`, and add the
-instance to `ALL[]` in `src/effects.cpp` (array order = auto-cycle order).
+instance (one file per effect in `src/effects/`, accessor in `src/effects/effects.h`) to `ALL[]` in `src/effects.cpp` (array order = auto-cycle order).
 
 ## Build and flash
 

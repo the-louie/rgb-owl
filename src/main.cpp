@@ -28,6 +28,7 @@ static bool renderWalk(uint32_t elapsedMs) {
 void setup() {
     Serial.begin(115200);
     leds::begin();
+    random16_set_seed(uint16_t(esp_random()));
     bootMs = lastMs = millis();
     EFFECTS[current].start();
     Serial.printf("owl: %u LEDs, grid %ux%u\n", leds::LAYOUT.numLeds, leds::LAYOUT.width,
