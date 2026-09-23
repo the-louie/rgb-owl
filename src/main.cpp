@@ -3,6 +3,7 @@
 #include "config.h"
 #include "effect.h"
 #include "leds.h"
+#include "owl/cycle.h"
 #include "owl/timing.h"
 
 using namespace owl;
@@ -11,8 +12,11 @@ static FramePacer pacer(1000 / config::FPS);
 static uint32_t bootMs;
 static uint32_t lastMs;
 static EffectClock effectClock;
-static size_t current = 0;
+static Cycler cycler(EFFECTS.size(), config::CYCLE_INTERVAL_MS, config::CYCLE_FADE_MS);
+static CRGB fadeBuf[leds::LAYOUT.numLeds];
 static Canvas canvas{leds::strip};
+static Canvas fadeCanvas{fadeBuf};
+static bool walking = true;
 
 // Boot test pattern: walks the strip in wiring order, one hue per column,
 // so the layout in include/layout.h can be checked against the hardware.
@@ -25,14 +29,30 @@ static bool renderWalk(uint32_t elapsedMs) {
     return true;
 }
 
+static void renderEffects(uint32_t dt) {
+    uint32_t before = effectClock.now();
+    uint32_t t = effectClock.advance(dt, 128);
+    Frame frame{t, t - before};
+
+    Cycler::State s = cycler.update(dt);
+    if (s.started >= 0) {
+        EFFECTS[size_t(s.started)].start();
+        Serial.printf("effect: %s\n", EFFECTS[size_t(s.started)].name());
+    }
+    EFFECTS[s.current].render(canvas, frame);
+    if (s.next >= 0) {
+        EFFECTS[size_t(s.next)].render(fadeCanvas, frame);
+        nblend(leds::strip, fadeBuf, leds::LAYOUT.numLeds, s.mix);
+    }
+}
+
 void setup() {
     Serial.begin(115200);
     leds::begin();
     random16_set_seed(uint16_t(esp_random()));
     bootMs = lastMs = millis();
-    EFFECTS[current].start();
-    Serial.printf("owl: %u LEDs, grid %ux%u\n", leds::LAYOUT.numLeds, leds::LAYOUT.width,
-                  leds::LAYOUT.height);
+    Serial.printf("owl: %u LEDs, grid %ux%u, %u effects\n", leds::LAYOUT.numLeds,
+                  leds::LAYOUT.width, leds::LAYOUT.height, unsigned(EFFECTS.size()));
 }
 
 void loop() {
@@ -40,10 +60,10 @@ void loop() {
     if (!pacer.due(now)) return;
     uint32_t dt = now - lastMs;
     lastMs = now;
-    if (!renderWalk(now - bootMs)) {
-        uint32_t before = effectClock.now();
-        uint32_t t = effectClock.advance(dt, 128);
-        EFFECTS[current].render(canvas, Frame{t, t - before});
+    if (walking && !renderWalk(now - bootMs)) {
+        walking = false;
+        EFFECTS[cycler.current()].start();
     }
+    if (!walking) renderEffects(dt);
     leds::show();
 }
