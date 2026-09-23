@@ -10,5 +10,6 @@ Effect& rain();
 Effect& flame();
 Effect& aurora();
 Effect& rainbow();
+Effect& breathing();
 
 }  // namespace owl::effects

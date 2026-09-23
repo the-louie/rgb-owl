@@ -9,6 +9,7 @@ static Effect* const ALL[] = {
     &effects::flame(),
     &effects::aurora(),
     &effects::rainbow(),
+    &effects::breathing(),
 };
 const Registry<Effect> EFFECTS(ALL);
 
