@@ -64,7 +64,9 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 ## Connectivity
 
 - Joins home WiFi; hostname/mDNS `owl.local`.
-- No stored credentials / connect fails → AP `Owl-Setup` with captive portal (WiFiManager).
+- No stored credentials / no connection within 15 s → open AP `Owl-Setup` with captive portal
+  (WiFiManager, non-blocking so LEDs keep running). Portal closes after 5 min and home WiFi is
+  retried, so a router that boots slower than the owl never leaves it stuck in setup mode.
 - Web UI (embedded single page): on/off, effect select, auto-cycle on/off, cycle interval,
   fade time, brightness, speed, breathing colour.
 - OTA: ArduinoOTA (`pio run -t upload --upload-port owl.local`) and `.bin` upload in web UI.

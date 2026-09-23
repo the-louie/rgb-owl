@@ -75,7 +75,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 Unscheduled, in rough priority order. Sprint 03 draws from here.
 
 - ~~**Settings model + NVS persistence, debounced 5 s**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-13/T-14):** `lib/owl/src/owl/settings.h`, `src/settings_store.cpp`, `src/app.cpp` (`saver.due` → `store::save`). Original row kept for the record: Settings model + NVS persistence, debounced 5 s (SPEC §Behaviour)
-- **WiFi: WiFiManager captive portal `Owl-Setup`, STA, mDNS `owl.local`** (SPEC §Connectivity)
+- ~~**WiFi: WiFiManager captive portal `Owl-Setup`, STA, mDNS `owl.local`**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-15):** `src/net.cpp` (`startConfigPortal(SETUP_AP)`, `MDNS.begin(HOSTNAME)`), policy `lib/owl/src/owl/wifi_fsm.h`. Original row kept for the record: WiFi: WiFiManager captive portal `Owl-Setup`, STA, mDNS `owl.local` (SPEC §Connectivity)
 - **Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour** (SPEC §Connectivity)
 - **OTA: ArduinoOTA + `.bin` upload endpoint** (SPEC §Connectivity)
 - **Real layout values in `layout.h`** (blocked: user must place the strip first)

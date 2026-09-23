@@ -169,4 +169,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | DECISION | Grid coords for effects: x=0 leftmost, y=0 bottom; EYES as {column,row-from-column-bottom}
 2026-09-23 | DECISION | FastLED 3.10.5 does not build on host (stub layer errors); effects live in src/ (s3zero only), pure logic in lib/owl with native tests
 2026-09-23 | EVENT    | T-03: FastLED driver in firmware = 35.7% of 1.9 MB app slot
+2026-09-23 | DECISION | WiFi policy: 15 s STA attempt -> Owl-Setup portal for 5 min -> retry STA (agent decision, closes gap: router down at boot)
+2026-09-23 | EVENT    | T-15: WiFi stack raises flash to 65.3% of 1.9 MB slot (default.csv 1.25 MB would not fit)
 ```
