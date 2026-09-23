@@ -1,0 +1,145 @@
+# AGENTS.md — RGB Owl Light Sign
+
+Guidance for any coding agent working in this repo. Read this first; load the
+referenced docs only when the task needs them.
+
+## Project in one paragraph
+
+Firmware for a 3D-printed, flat, stylised owl light sign. A WS2812B strip on the
+back shines forward through the white parts. An ESP32-S3-Zero drives it with pastel
+effects (plasma, matrix rain, flame, aurora, owl eyes, rainbow + twinkle, breathing).
+It has a WiFi web UI, OTA updates and auto-cycling with crossfades. The full spec is
+in `SPEC.md`, and it is the source of truth for behaviour.
+
+## Working rules
+
+1. **Decisions are the user's.** When a requirement is ambiguous or a design choice is
+   open, ask in interview form (multiple-choice, recommended option first). Don't guess.
+   Record every answer in the ledger below and update `SPEC.md` if it changes.
+2. **Smallest change that fixes the ticket.** Don't add unrequested features.
+3. **Don't commit unless asked.** The repo is on `main`, and nothing has been committed yet.
+4. **Verify by building** (`pio run`) before calling code work done. Hardware
+   behaviour can't be verified here, so say so.
+5. Keep `SPEC.md` (what), `AGENTS.md` (how and why, ledger) and the code consistent.
+6. Answers to the user: outcome first, short, and numbers instead of adjectives.
+
+## Hard constraints (do not change without asking the user)
+
+| Topic | Constraint | Why |
+|---|---|---|
+| MCU | Waveshare ESP32-S3-Zero, ESP32-S3FH4R2, **4 MB flash**, 2 MB PSRAM (quad) | User choice |
+| LED data pin | **GPIO1** | See pin rules below |
+| LED type | WS2812B, 5 V, GRB | Interview 2026-09-23 |
+| Level shifting | None. 3.3 V goes directly to DIN | User choice; accepted risk |
+| LED power | Separate 5 V 10 A PSU; firmware current cap 8000 mA | Interview |
+| Layout | Compile-time `include/layout.h` | Interview |
+| Stack | PlatformIO + Arduino + FastLED | Interview; build verified |
+
+### Pin rules (from the ESP32-S3 datasheet and the Zero schematic)
+- **Never use** GPIO0, 3, 45, 46 (strapping), GPIO19/20 (native USB D-/D+),
+  GPIO21 (onboard WS2812 status LED), GPIO43/44 (UART0 TX/RX),
+  GPIO33–37 (not broken out; used by PSRAM), or GPIO47/48 (not broken out).
+- Edge header pins: 5V, GND, 3V3, GPIO1–13, TX(43), RX(44).
+  GPIO14–18 are bottom pads only (for soldering or pogo pins).
+- Free for future use: GPIO2, 4–13. GPIO21 can serve as a status LED (onboard WS2812).
+- 5 V pad input range is 3.7–6 V. The onboard LDO is an ME6217C33M5G (800 mA max).
+  Never route LED current through the board.
+- Flashing: there is no USB-UART bridge, so hold BOOT (GPIO0) while plugging in USB-C
+  the first time. After that, OTA or USB CDC work.
+
+## LED layout model
+
+- Columns are counted **from right to left**. Column 0 is the rightmost column.
+- Zig-zag wiring: column 0 runs **bottom → top**, column 1 runs top → bottom, and so on,
+  alternating.
+- Each column is `{count, yOffset}`, where yOffset is the height of its bottom LED above
+  grid row 0. Columns are evenly spaced in X.
+- Virtual grid: width = number of columns, height = max(count + yOffset). Effects
+  draw in XY, and a lookup table maps each XY cell to a strip index, or −1 where there
+  is no LED.
+- About 6 columns of up to 15 LEDs each, roughly 90 LEDs total. **The values are
+  placeholders** until the user places the strip.
+- Eye LEDs are `(column,row)` pairs in `layout.h`, also placeholders for now.
+
+## Build and flash
+
+```sh
+pio run                                      # build
+pio run -t upload                            # USB (first time: hold BOOT while plugging in)
+pio run -t upload --upload-port owl.local    # OTA, once firmware is running
+pio device monitor                           # USB CDC serial
+```
+
+Board config: `board = esp32-s3-devkitc-1` with `board_upload.flash_size = 4MB`,
+`-DARDUINO_USB_CDC_ON_BOOT=1 -DARDUINO_USB_MODE=1`, and a 4 MB partition table with
+two OTA slots.
+
+Installed toolchain (user-level, verified 2026-09-23):
+- PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17
+  (ESP-IDF 4.4), `toolchain-xtensa-esp32s3`, esptool 4.5.1
+- arduino-cli 1.5.1 with `esp32:esp32` 3.3.11 (alternative; not the primary build)
+- FastLED ^3.9.0 smoke build: RAM 7.9 %, flash 53 % of 1.25 MB app partition
+
+## Reference documentation index (`__docs/`, gitignored)
+
+Load these into context only when needed. If `__docs/` is missing, re-download from the URLs.
+
+| File | Load when | Source |
+|---|---|---|
+| `ESP32-S3-Zero-Sch.pdf` | Pin mapping, power path, onboard LED/buttons | files.waveshare.com/wiki/ESP32-S3-Zero/ESP32-S3-Zero-Sch.pdf |
+| `ESP32-S3-Zero.png`, `ESP32-S3-Zero-2D-size.jpg` | Physical pinout, board dimensions for mounting | Waveshare wiki |
+| `waveshare-esp32-s3-zero-wiki.html` | Board FAQ, flashing procedure, power notes | waveshare.com/wiki/ESP32-S3-Zero |
+| `esp32-s3_datasheet_en.pdf` | Strapping pins, GPIO electrical specs, pin functions | documentation.espressif.com |
+| `esp32-s3_technical_reference_manual_en.pdf` (15 MB, large) | RMT peripheral registers, only for low-level driver issues | documentation.espressif.com |
+| `esp32-s3_hardware_design_guidelines_en.pdf` | Power, decoupling, GPIO drive design questions | docs.espressif.com |
+| `esp-idf-rmt-esp32s3.html` | RMT driver behaviour (FastLED uses RMT on the S3) | docs.espressif.com ESP-IDF stable |
+| `esp-idf-gpio-esp32s3.html` | GPIO restrictions and drive strength | docs.espressif.com ESP-IDF stable |
+| `WS2812B.pdf` | LED timing, VIH = 0.7 × VDD, current per LED | cdn-shop.adafruit.com |
+| `XL-0807RGBC-WS2812B.pdf` | Onboard status LED on GPIO21 | Waveshare |
+| `SK6812_LED_datasheet_.pdf` | Only if the strip type changes to RGBW | cdn-shop.adafruit.com |
+| `sn74ahct125.pdf`, `sn74lvc1t45.pdf` | Level-shifter fallback if 3.3 V data flickers | ti.com |
+| `FastLED-README.md` | FastLED API, ESP32 driver notes | github.com/FastLED/FastLED |
+
+Useful but not downloaded (fetch on demand): the FastLED docs site
+(fastled.io/docs), the WiFiManager README (github.com/tzapu/WiFiManager), and the
+PlatformIO espressif32 docs (docs.platformio.org/en/latest/platforms/espressif32.html).
+
+## Known risks
+
+- **3.3 V data to a 5 V WS2812B** is outside spec (it needs ≥3.5 V). Symptoms: random
+  flicker, or wrong colours on the first LED. Fix options, in order: shorten the data
+  wire (<30 cm), add a 330 Ω series resistor, add a 74AHCT125 buffer, or use a
+  sacrificial first pixel. Ask the user before changing the hardware plan.
+- WiFi activity can disturb RMT timing. If flicker correlates with WiFi, check the
+  FastLED ESP32 RMT settings (e.g. `FASTLED_RMT_MAX_CHANNELS`, and pinning the LED task
+  to core 1).
+- Disk space on the dev host is 88 % used (13 GB free). Avoid installing extra
+  toolchains such as a full ESP-IDF unless needed.
+
+## Ledger
+
+Append-only. Newest entries go at the bottom. Format: `date | type | entry`.
+Types: DECISION, EVENT, OPEN, CLOSED.
+
+```
+2026-09-23 | EVENT    | Reference docs downloaded to __docs/ (15 files); __docs/ in .gitignore; git init (main)
+2026-09-23 | EVENT    | Toolchain verified: PlatformIO + espressif32 6.11.0 FastLED smoke build OK; nothing installed
+2026-09-23 | DECISION | MCU = Waveshare ESP32-S3-Zero (user's choice, no reason to deviate)
+2026-09-23 | DECISION | LED data pin = GPIO1 (agent decision per datasheet/schematic; rules above)
+2026-09-23 | DECISION | Strip = WS2812B 5V GRB
+2026-09-23 | DECISION | Level shifting = none, 3.3V direct (user accepted risk)
+2026-09-23 | DECISION | Stack = PlatformIO + Arduino + FastLED
+2026-09-23 | DECISION | Control = WiFi web UI + auto-cycle (no physical button, no Home Assistant)
+2026-09-23 | DECISION | Layout = compile-time include/layout.h; ~6 cols x <=15 LEDs; zig-zag from bottom-right, col 0 up
+2026-09-23 | DECISION | Geometry = even column spacing, per-column bottom Y offset
+2026-09-23 | DECISION | PSU = 5V 10A separate; firmware cap 8000 mA
+2026-09-23 | DECISION | WiFi = home STA + AP fallback captive portal "Owl-Setup" (WiFiManager); mDNS owl.local
+2026-09-23 | DECISION | Effects = pastel plasma, matrix rain, flame, aurora, owl eyes, rainbow+twinkle, breathing
+2026-09-23 | DECISION | Auto-cycle = fixed order, 60 s interval, 2 s crossfade, both adjustable in UI
+2026-09-23 | DECISION | Settings persisted to NVS, debounced ~5 s
+2026-09-23 | DECISION | OTA = ArduinoOTA + .bin upload in web UI
+2026-09-23 | DECISION | Eyes = lit from strip, positions in layout.h
+2026-09-23 | EVENT    | SPEC.md written; user asked to stop for review before implementation
+2026-09-23 | OPEN     | Real column counts, Y offsets, eye positions (after strip placement)
+2026-09-23 | OPEN     | User review of SPEC.md -> then implement
+```

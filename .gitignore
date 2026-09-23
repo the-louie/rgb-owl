@@ -1,0 +1,4 @@
+__docs/
+.pio/
+.vscode/
+*.bin
