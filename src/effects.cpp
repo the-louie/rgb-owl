@@ -2,12 +2,13 @@
 
 namespace owl {
 
-// Auto-cycle order.
+// Auto-cycle order (SPEC.md §Effects).
 static Effect* const ALL[] = {
     &effects::plasma(),
     &effects::rain(),
     &effects::flame(),
     &effects::aurora(),
+    &effects::eyes(),
     &effects::rainbow(),
     &effects::breathing(),
 };
