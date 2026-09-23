@@ -107,6 +107,6 @@ constexpr Layout<W, H, N> buildLayout(const Column (&cols)[W]) {
 
 // Declares OWL_LAYOUT from a Column array (use in include/layout.h).
 #define OWL_DEFINE_LAYOUT(cols)                                                             \
-    constexpr auto OWL_LAYOUT =                                                             \
+    inline constexpr auto OWL_LAYOUT =                                                           \
         ::owl::buildLayout<sizeof(cols) / sizeof(cols[0]), ::owl::gridHeight(cols),         \
                            ::owl::totalLeds(cols)>(cols)

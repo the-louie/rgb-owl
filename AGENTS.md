@@ -79,6 +79,8 @@ Board config: `board = esp32-s3-devkitc-1` with `board_upload.flash_size = 4MB`,
 `-DARDUINO_USB_CDC_ON_BOOT=1 -DARDUINO_USB_MODE=1`, partitions `min_spiffs.csv`
 (2 × 1.9 MB OTA slots). `pio test -e native` runs Unity tests in `test/` against `lib/`
 (src/ is not built for tests, so keep testable logic Arduino-free in `lib/`).
+FastLED does not compile on host (3.10.5 stub layer), so effect rendering stays in `src/`.
+Constants: `include/config.h`; layout: `include/layout.h`.
 
 Installed toolchain (user-level, verified 2026-09-23):
 - PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17
@@ -156,4 +158,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | DECISION | Partitions = min_spiffs.csv (2x1.9 MB OTA; agent decision: web UI embedded, no FS needed)
 2026-09-23 | DECISION | C++17 for s3zero (unflag gnu++11) and native; layout mapping is constexpr in lib/owl
 2026-09-23 | DECISION | Grid coords for effects: x=0 leftmost, y=0 bottom; EYES as {column,row-from-column-bottom}
+2026-09-23 | DECISION | FastLED 3.10.5 does not build on host (stub layer errors); effects live in src/ (s3zero only), pure logic in lib/owl with native tests
+2026-09-23 | EVENT    | T-03: FastLED driver in firmware = 35.7% of 1.9 MB app slot
 ```
