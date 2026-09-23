@@ -75,6 +75,13 @@ Palette bias: pastel (desaturated) colours where the effect allows.
   - `POST /api/state` with form fields of the same names (`effect` accepts index or name) → new state,
     or 400 `{"error"}`
   - `GET /api/effects` → effect names in cycle order
+- Debug API (open, like the web UI):
+  - `GET /api/debug`: build, uptime, reset reason, heap, fps, show() time, estimated LED mA vs limit,
+    brightness after power limit, effect, test mode, WiFi state/SSID/RSSI/IP
+  - `GET /api/log`: last 4 KB of the firmware log (same lines as USB serial)
+  - `POST /api/test`: `mode=none|off|solid|pixel|column|row|walk`, optional `r,g,b` and `index`
+    (pixel = strip index, column = physical column 0 = rightmost, row = grid y); overrides effects until `none`
+  - `POST /api/reboot`
 - OTA: ArduinoOTA (`pio run -e s3zero-ota -t upload`, espota to `owl.local`) and `.bin` upload in
   the web UI (`POST /update`, multipart, `password` field before the file). Both require the OTA
   password (`[owl] ota_password` in `platformio.ini`); the rest of the web UI is open.

@@ -7,6 +7,7 @@
 #include <WebServer.h>
 
 #include "config.h"
+#include "log.h"
 #include "http.h"
 #include "net.h"
 
@@ -39,10 +40,10 @@ static void uploadChunk() {
             // the password field precedes the file in the multipart body
             rejected = http::server().arg("password") != OWL_OTA_PASSWORD;
             if (rejected) {
-                Serial.println("ota: web upload rejected, wrong password");
+                log::printf("ota: web upload rejected, wrong password");
                 break;
             }
-            Serial.printf("ota: web upload %s\n", u.filename.c_str());
+            log::printf("ota: web upload %s", u.filename.c_str());
             blankLeds();
             if (!Update.begin(UPDATE_SIZE_UNKNOWN)) Update.printError(Serial);
             break;
@@ -63,8 +64,11 @@ void begin() {
     ArduinoOTA.setHostname(config::HOSTNAME);
     ArduinoOTA.setPassword(OWL_OTA_PASSWORD);
     ArduinoOTA.setMdnsEnabled(false);  // net.cpp owns mDNS
-    ArduinoOTA.onStart(blankLeds);
-    ArduinoOTA.onError([](ota_error_t e) { Serial.printf("ota: error %u\n", unsigned(e)); });
+    ArduinoOTA.onStart([] {
+        log::printf("ota: ArduinoOTA update started");
+        blankLeds();
+    });
+    ArduinoOTA.onError([](ota_error_t e) { log::printf("ota: error %u", unsigned(e)); });
 }
 
 void loop() {

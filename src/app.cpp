@@ -3,11 +3,13 @@
 #include <Arduino.h>
 
 #include "config.h"
+#include "log.h"
 #include "effect.h"
 #include "effects/effects.h"
 #include "leds.h"
 #include "owl/cycle.h"
 #include "owl/debounce.h"
+#include "owl/stats.h"
 #include "owl/timing.h"
 #include "settings_store.h"
 
@@ -24,6 +26,14 @@ static CRGB fadeBuf[leds::LAYOUT.numLeds];
 static Canvas canvas{leds::strip};
 static Canvas fadeCanvas{fadeBuf};
 static bool walking = true;
+static FrameStats stats;
+
+enum class Test { None, Off, Solid, Pixel, Column, Row, Walk };
+static const char* const TEST_NAMES[] = {"none", "off", "solid", "pixel", "column", "row", "walk"};
+static Test test = Test::None;
+static CRGB testColor;
+static int testIndex = 0;
+static uint32_t testStartMs = 0;
 
 // Pushes settings to the hardware and scheduler (idempotent).
 static void applyAll() {
@@ -45,6 +55,27 @@ static bool renderWalk(uint32_t elapsedMs) {
     return true;
 }
 
+static void renderTest(uint32_t now) {
+    const auto& L = leds::LAYOUT;
+    fill_solid(leds::strip, L.numLeds, CRGB::Black);
+    switch (test) {
+        case Test::Solid: fill_solid(leds::strip, L.numLeds, testColor); break;
+        case Test::Pixel: leds::strip[testIndex] = testColor; break;
+        case Test::Column:
+            for (int y = 0; y < L.height; ++y) leds::setXY(L.width - 1 - testIndex, y, testColor);
+            break;
+        case Test::Row:
+            for (int x = 0; x < L.width; ++x) leds::setXY(x, testIndex, testColor);
+            break;
+        case Test::Walk: {
+            uint32_t cycle = uint32_t(config::WALK_STEP_MS) * L.numLeds;
+            renderWalk((now - testStartMs) % cycle);
+            break;
+        }
+        default: break;
+    }
+}
+
 static void renderEffects(uint32_t dt) {
     uint32_t before = effectClock.now();
     uint32_t t = effectClock.advance(dt, cfg.speed);
@@ -53,12 +84,27 @@ static void renderEffects(uint32_t dt) {
     Cycler::State s = cycler.update(dt);
     if (s.started >= 0) {
         EFFECTS[size_t(s.started)].start();
-        Serial.printf("effect: %s\n", EFFECTS[size_t(s.started)].name());
+        log::printf("effect: %s", EFFECTS[size_t(s.started)].name());
     }
     EFFECTS[s.current].render(canvas, frame);
     if (s.next >= 0) {
         EFFECTS[size_t(s.next)].render(fadeCanvas, frame);
         nblend(leds::strip, fadeBuf, leds::LAYOUT.numLeds, s.mix);
+    }
+}
+
+static const char* resetReason() {
+    switch (esp_reset_reason()) {
+        case ESP_RST_POWERON: return "power-on";
+        case ESP_RST_SW: return "software";
+        case ESP_RST_PANIC: return "panic";
+        case ESP_RST_INT_WDT: return "interrupt-watchdog";
+        case ESP_RST_TASK_WDT: return "task-watchdog";
+        case ESP_RST_WDT: return "watchdog";
+        case ESP_RST_BROWNOUT: return "brownout";
+        case ESP_RST_DEEPSLEEP: return "deep-sleep";
+        case ESP_RST_EXT: return "external";
+        default: return "other";
     }
 }
 
@@ -71,7 +117,8 @@ void begin() {
     cycler.update(cfg.fadeMs);  // start on the saved effect without a fade
     random16_set_seed(uint16_t(esp_random()));
     bootMs = lastMs = millis();
-    Serial.printf("owl: %u LEDs, grid %ux%u, %u effects\n", leds::LAYOUT.numLeds,
+    log::printf("owl: boot, reset reason %s, built %s %s", resetReason(), __DATE__, __TIME__);
+    log::printf("owl: %u LEDs, grid %ux%u, %u effects", leds::LAYOUT.numLeds,
                   leds::LAYOUT.width, leds::LAYOUT.height, unsigned(EFFECTS.size()));
 }
 
@@ -86,13 +133,17 @@ void loop() {
         EFFECTS[cycler.current()].start();
     }
     if (!walking) {
-        if (cfg.on) {
+        if (test != Test::None) {
+            renderTest(now);
+        } else if (cfg.on) {
             renderEffects(dt);
         } else {
             fill_solid(leds::strip, leds::LAYOUT.numLeds, CRGB::Black);
         }
     }
+    uint32_t t0 = micros();
     leds::show();
+    stats.record(micros() - t0, now);
 }
 
 const Settings& settings() { return cfg; }
@@ -110,5 +161,49 @@ ApplyResult set(const char* key, const char* value) {
 }
 
 size_t currentEffect() { return cycler.current(); }
+
+bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index) {
+    const auto& L = leds::LAYOUT;
+    int k = -1;
+    for (int i = 0; i < int(sizeof(TEST_NAMES) / sizeof(TEST_NAMES[0])); ++i)
+        if (!strcmp(mode, TEST_NAMES[i])) k = i;
+    if (k < 0) return false;
+    Test t = Test(k);
+    int limit = t == Test::Pixel ? L.numLeds : t == Test::Column ? L.width : t == Test::Row ? L.height : 1;
+    if (index < 0 || index >= limit) return false;
+    test = t;
+    testIndex = index;
+    testColor = (r | g | b) ? CRGB(r, g, b) : CRGB(255, 255, 255);
+    testStartMs = millis();
+    walking = false;
+    if (t == Test::None) EFFECTS[cycler.current()].start();
+    log::printf("test: %s index=%d rgb=%u,%u,%u", mode, index, testColor.r, testColor.g, testColor.b);
+    return true;
+}
+
+void appendDebug(String& j) {
+    const auto& L = leds::LAYOUT;
+    // strip holds unscaled colours; FastLED applies brightness + power limit at show()
+    uint32_t mW = calculate_unscaled_power_mW(leds::strip, L.numLeds);
+    uint8_t limited = calculate_max_brightness_for_power_mW(
+        leds::strip, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
+    char buf[512];
+    snprintf(buf, sizeof(buf),
+             "\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
+             "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
+             "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
+             "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_walk\":%s,"
+             "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
+             "\"power_limit_ma\":%lu",
+             __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
+             unsigned(ESP.getFreeHeap()), unsigned(ESP.getMinFreeHeap()),
+             unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
+             (unsigned long)stats.fps(), (unsigned long)stats.maxFrameUs(), L.numLeds, L.width,
+             L.height, config::LED_PIN, unsigned(FASTLED_VERSION), EFFECTS[cycler.current()].name(),
+             TEST_NAMES[int(test)], walking ? "true" : "false", cfg.brightness, limited,
+             (unsigned long)(uint64_t(mW) * limited / 255 / config::LED_VOLTS),
+             (unsigned long)config::LED_MAX_MILLIAMPS);
+    j += buf;
+}
 
 }  // namespace owl::app

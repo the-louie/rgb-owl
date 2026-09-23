@@ -73,6 +73,14 @@ passed to `render()` (never into `leds::strip` directly, because crossfade rende
 effects), use `Frame::t` / `Frame::dt` (speed-scaled ms) instead of `millis()`, and add the
 instance (one file per effect in `src/effects/`, accessor in `src/effects/effects.h`) to `ALL[]` in `src/effects.cpp` (array order = auto-cycle order).
 
+## Talking to the device
+
+The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
+- Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until `uptime_s` resets.
+- Inspect: `curl http://10.13.110.163/api/debug`, `curl http://10.13.110.163/api/log`.
+- Test patterns: `curl -d "mode=column&index=0" http://10.13.110.163/api/test` (put back with `mode=none`).
+  Test patterns are visible to the user on the real sign, so keep them short and always reset to `none`.
+
 ## Build and flash
 
 ```sh
@@ -96,7 +104,9 @@ Installed toolchain (user-level, verified 2026-09-23):
 - PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17
   (ESP-IDF 4.4), `toolchain-xtensa-esp32s3`, esptool 4.5.1
 - arduino-cli 1.5.1 with `esp32:esp32` 3.3.11 (alternative; not the primary build)
-- FastLED ^3.9.0 smoke build: RAM 7.9 %, flash 53 % of 1.25 MB app partition
+- FastLED pinned to **3.9.20**: 3.10.x silently falls back to a bit-banged generic driver on
+  Arduino core 2.0.17 / IDF 4.4 (serial warning `Using GENERIC fallback clockless controller`),
+  which made every LED white on hardware. Check the serial log/`/api/log` after any FastLED bump.
 
 ## Reference documentation index (`__docs/`, gitignored)
 
@@ -175,4 +185,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | OPEN     | OTA/web auth: none for now (anyone on home LAN can reflash); needs user decision
 2026-09-23 | EVENT    | Sprints 01-03 done (18 tickets): 7 effects, auto-cycle, NVS, WiFi portal, web UI, OTA; 44 native tests; hardware unverified
 2026-09-23 | CLOSED   | OTA auth (user decision): password for ArduinoOTA + web /update, web UI open; single source [owl] ota_password in platformio.ini
+2026-09-23 | EVENT    | Hardware bring-up: all LEDs white; cause FastLED 3.10.5 GENERIC fallback driver on IDF 4.4; pinned 3.9.20 (RMT) -> user confirms it works
+2026-09-23 | DECISION | Debug API added (/api/debug, /api/log, /api/test, /api/reboot), open like the web UI; device at 10.13.110.163, agent may OTA it
 ```
