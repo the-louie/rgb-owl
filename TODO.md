@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 01, in progress (opened 2026-09-23)
-**Current ticket:** T-02 (`todo` — `layout.h` + XY→index map (constexpr, zig-zag from bottom-right) + native tests)
+**Current ticket:** T-02 (`in-progress` — `layout.h` + XY→index map (constexpr, zig-zag from bottom-right) + native tests)
 **Last completed:** T-01 (`done` — commit `31a4091`)
 
 ## Conventions
@@ -33,7 +33,7 @@ column-walk test pattern confirms the zig-zag layout, then plasma runs.
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
 | T-01 | PlatformIO project: `s3zero` + `native` envs, 4 MB dual-OTA partitions, `main.cpp` stub | 1h | — | done | SPEC §Software; Landed in `31a4091` |
-| T-02 | `layout.h` + XY→index map (constexpr, zig-zag from bottom-right) + native tests | 3h | T-01 | todo | SPEC §LED layout |
+| T-02 | `layout.h` + XY→index map (constexpr, zig-zag from bottom-right) + native tests | 3h | T-01 | in-progress | SPEC §LED layout |
 | T-03 | LED driver: FastLED on GPIO1, GRB, 8 A power cap, fixed-FPS render loop, column-walk test pattern | 2h | T-02 | todo | SPEC §Hardware |
 | T-04 | Effect interface + registry, hardware-independent where possible + native tests | 2h | T-02 | todo | |
 | T-05 | Pastel plasma effect | 2h | T-03, T-04 | todo | SPEC §Effects 1 |
