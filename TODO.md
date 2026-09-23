@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 03, in progress (opened 2026-09-23)
-**Current ticket:** T-14 (`todo` — NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue)
+**Current ticket:** T-14 (`in-progress` — NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue)
 **Last completed:** T-13 (`done` — commit `507e43e`)
 
 ## Conventions
@@ -64,7 +64,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
 | T-13 | Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests | 2h | — | done | Backlog row 1; Landed in `507e43e` |
-| T-14 | NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue | 3h | T-13 | todo | Backlog row 1 |
+| T-14 | NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue | 3h | T-13 | in-progress | Backlog row 1 |
 | T-15 | WiFi: WiFiManager non-blocking portal `Owl-Setup`, STA, hostname + mDNS `owl.local` | 3h | — | todo | Backlog row 2 |
 | T-16 | HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects` | 2h | T-14, T-15 | todo | Backlog row 3 |
 | T-17 | Web UI: embedded single page using the API | 3h | T-16 | todo | Backlog row 3 |
