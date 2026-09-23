@@ -9,7 +9,6 @@ CRGB strip[LAYOUT.numLeds];
 void begin() {
     FastLED.addLeds<WS2812B, config::LED_PIN, GRB>(strip, LAYOUT.numLeds);
     FastLED.setMaxPowerInVoltsAndMilliamps(config::LED_VOLTS, config::LED_MAX_MILLIAMPS);
-    FastLED.setBrightness(config::DEFAULT_BRIGHTNESS);
     FastLED.clear(true);
 }
 

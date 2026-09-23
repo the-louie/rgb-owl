@@ -14,15 +14,16 @@ public:
         c.fill(pastel(hue, v));
     }
 
-    uint8_t hue = 160;  // pastel blue; web UI will set this
+    uint8_t hue = 160;  // set from Settings::hue
 
 private:
     static constexpr uint32_t PERIOD_MS = 5000;
 };
 
-Effect& breathing() {
-    static Breathing e;
-    return e;
-}
+static Breathing instance;
+
+Effect& breathing() { return instance; }
+
+void setBreathingHue(uint8_t hue) { instance.hue = hue; }
 
 }  // namespace owl::effects

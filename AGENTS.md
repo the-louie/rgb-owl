@@ -87,7 +87,9 @@ Board config: `board = esp32-s3-devkitc-1` with `board_upload.flash_size = 4MB`,
 (2 × 1.9 MB OTA slots). `pio test -e native` runs Unity tests in `test/` against `lib/`
 (src/ is not built for tests, so keep testable logic Arduino-free in `lib/`).
 FastLED does not compile on host (3.10.5 stub layer), so effect rendering stays in `src/`.
-Constants: `include/config.h`; layout: `include/layout.h`.
+Constants: `include/config.h`; layout: `include/layout.h`; user settings + defaults:
+`lib/owl/src/owl/settings.h`. `src/app.cpp` owns the render loop and settings; other
+modules change settings only through `app::set(key, value)`.
 
 Installed toolchain (user-level, verified 2026-09-23):
 - PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17

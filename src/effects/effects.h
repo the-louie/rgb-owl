@@ -13,4 +13,6 @@ Effect& rainbow();
 Effect& breathing();
 Effect& eyes();
 
+void setBreathingHue(uint8_t hue);
+
 }  // namespace owl::effects
