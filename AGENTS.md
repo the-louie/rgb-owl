@@ -66,6 +66,13 @@ in `SPEC.md`, and it is the source of truth for behaviour.
   placeholders** until the user places the strip.
 - Eye LEDs are `(column,row)` pairs in `layout.h`, also placeholders for now.
 
+## Adding an effect
+
+Subclass `owl::Effect` (`src/effect.h`), draw with `Canvas::set(x, y, c)` into the buffer
+passed to `render()` (never into `leds::strip` directly, because crossfade renders two
+effects), use `Frame::t` / `Frame::dt` (speed-scaled ms) instead of `millis()`, and add the
+instance to `ALL[]` in `src/effects.cpp` (array order = auto-cycle order).
+
 ## Build and flash
 
 ```sh
