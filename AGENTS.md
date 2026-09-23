@@ -17,11 +17,14 @@ in `SPEC.md`, and it is the source of truth for behaviour.
    open, ask in interview form (multiple-choice, recommended option first). Don't guess.
    Record every answer in the ledger below and update `SPEC.md` if it changes.
 2. **Smallest change that fixes the ticket.** Don't add unrequested features.
-3. **Don't commit unless asked.** The repo is on `main`, and nothing has been committed yet.
-4. **Verify by building** (`pio run`) before calling code work done. Hardware
-   behaviour can't be verified here, so say so.
+3. **Commits:** only when asked, or inside the sprint loop, which is standing permission.
+   The loop makes 3 commits per ticket (`T-XX: start` / `T-XX: <title>` / `T-XX: close`)
+   as The Louie, with no attribution trailer.
+4. **Gate:** `pio test -e native` must pass and `pio run -e s3zero` must build before
+   work counts as done. Hardware behaviour can't be verified here, so say so.
 5. Keep `SPEC.md` (what), `AGENTS.md` (how and why, ledger) and the code consistent.
 6. Answers to the user: outcome first, short, and numbers instead of adjectives.
+7. **Planning / backlog:** `TODO.md` (roadmap, active sprint, backlog, retros in one file).
 
 ## Hard constraints (do not change without asking the user)
 
@@ -142,4 +145,9 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | EVENT    | SPEC.md written; user asked to stop for review before implementation
 2026-09-23 | OPEN     | Real column counts, Y offsets, eye positions (after strip placement)
 2026-09-23 | OPEN     | User review of SPEC.md -> then implement
+2026-09-23 | CLOSED   | User review of SPEC.md: approved by starting implementation (/sprint-superloop)
+2026-09-23 | DECISION | Backlog = TODO.md at repo root (single planning file)
+2026-09-23 | DECISION | Loop commits: start/work/close per ticket, no trailer
+2026-09-23 | DECISION | Superloop runs autonomously, no review stop between sprints
+2026-09-23 | DECISION | Gate = native Unity tests + s3zero build; hardware unverified until user flashes
 ```
