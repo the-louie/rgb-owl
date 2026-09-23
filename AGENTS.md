@@ -153,4 +153,7 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | DECISION | Loop commits: start/work/close per ticket, no trailer
 2026-09-23 | DECISION | Superloop runs autonomously, no review stop between sprints
 2026-09-23 | DECISION | Gate = native Unity tests + s3zero build; hardware unverified until user flashes
+2026-09-23 | DECISION | Partitions = min_spiffs.csv (2x1.9 MB OTA; agent decision: web UI embedded, no FS needed)
+2026-09-23 | DECISION | C++17 for s3zero (unflag gnu++11) and native; layout mapping is constexpr in lib/owl
+2026-09-23 | DECISION | Grid coords for effects: x=0 leftmost, y=0 bottom; EYES as {column,row-from-column-bottom}
 ```

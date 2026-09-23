@@ -35,10 +35,11 @@ facing forward through the white parts.
   ```cpp
   // {count, yOffset} from right to left
   constexpr Column COLUMNS[] = {{8,3},{13,1},{15,0},{15,0},{13,1},{8,3}};
-  constexpr EyeLed EYES[] = {{2,10},{3,10}}; // (column,row) — placeholder
+  constexpr ColumnLed EYES[] = {{2,11},{3,11}}; // {column, row from column bottom} — placeholder
   ```
 - Firmware builds an XY → strip-index map; effects render on a virtual grid
-  (width = columns, height = max(count + yOffset)); cells without an LED are skipped.
+  (width = columns, height = max(count + yOffset); x = 0 leftmost, y = 0 bottom);
+  cells without an LED are skipped. Mapping is `constexpr` (`lib/owl/src/owl/layout_map.h`).
 
 ## Effects
 
