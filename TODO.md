@@ -79,7 +79,8 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - ~~**Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-16/T-17):** `src/http.cpp` (`/`, `/api/state`, `/api/effects`), `web/index.html`; headless-Chrome smoke test against a mock API: 7 effect buttons, 3 POSTs, no JS errors, no horizontal scroll at 390 px. Original row kept for the record: Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour (SPEC §Connectivity)
 - ~~**OTA: ArduinoOTA + `.bin` upload endpoint**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-18):** `src/ota.cpp` (`ArduinoOTA.begin`, `/update` handler), `[env:s3zero-ota]` in `platformio.ini`. Original row kept for the record: OTA: ArduinoOTA + `.bin` upload endpoint (SPEC §Connectivity)
 - ~~**OTA / web UI authentication**~~ — **CLOSED, verified 2026-09-23 (user decision):** OTA password in `platformio.ini` `[owl] ota_password`, enforced in `src/ota.cpp` (`ArduinoOTA.setPassword`, `/update` → 401); web UI stays open. Original row kept for the record: OTA / web UI authentication (needs user decision)
-- **Real layout values in `layout.h`** (blocked: user must place the strip first; use the boot column walk to check)
+- ~~**Real layout values in `layout.h`**~~ — **CLOSED, verified 2026-09-23:** 62 LEDs / 6x12 in `include/layout.h`, pinned by `test_config_matches_measured_owl`; flashed, `/api/debug` reports `"leds":62,"grid":"6x12"`. Original row kept for the record: Real layout values in `layout.h` (blocked: user must place the strip first)
+- **Final eye LEDs** (provisional 6+13 right, 35+51 left; user confirms once the owl is mounted)
 - **Hardware bring-up + effect tuning** (needs flashed hardware: 3.3 V data reliability, WiFi/RMT flicker, effect speeds and colours, power cap)
 
 ## Retros

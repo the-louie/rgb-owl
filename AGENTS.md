@@ -62,9 +62,9 @@ in `SPEC.md`, and it is the source of truth for behaviour.
 - Virtual grid: width = number of columns, height = max(count + yOffset). Effects
   draw in XY, and a lookup table maps each XY cell to a strip index, or −1 where there
   is no LED.
-- About 6 columns of up to 15 LEDs each, roughly 90 LEDs total. **The values are
-  placeholders** until the user places the strip.
-- Eye LEDs are `(column,row)` pairs in `layout.h`, also placeholders for now.
+- Measured owl (2026-09-23): 6 columns, 62 LEDs, grid 6×12; see `include/layout.h`.
+- Eye LEDs are `(column,row)` pairs in `layout.h`: strip LEDs 6+13 (right), 35+51 (left),
+  **provisional** until the owl is mounted.
 
 ## Adding an effect
 
@@ -77,7 +77,8 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 
 The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
 - Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until `uptime_s` resets.
-- Inspect: `curl http://10.13.110.163/api/debug`, `curl http://10.13.110.163/api/log`.
+- Inspect: `curl http://10.13.110.163/api/debug`, `/api/log`, and `/api/frame` (what the effect
+  actually rendered; use it before guessing at a visual bug report).
 - Test patterns: `curl -d "mode=column&index=0" http://10.13.110.163/api/test` (put back with `mode=none`).
   Test patterns are visible to the user on the real sign, so keep them short and always reset to `none`.
 
@@ -187,4 +188,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | CLOSED   | OTA auth (user decision): password for ArduinoOTA + web /update, web UI open; single source [owl] ota_password in platformio.ini
 2026-09-23 | EVENT    | Hardware bring-up: all LEDs white; cause FastLED 3.10.5 GENERIC fallback driver on IDF 4.4; pinned 3.9.20 (RMT) -> user confirms it works
 2026-09-23 | DECISION | Debug API added (/api/debug, /api/log, /api/test, /api/reboot), open like the web UI; device at 10.13.110.163, agent may OTA it
+2026-09-23 | DECISION | Layout = measured owl, 62 LEDs, COLUMNS {10,2},{11,1},{11,1},{12,0},{11,1},{7,0}; user-verified via ASCII diagram
+2026-09-23 | OPEN     | Eye LEDs provisional (6,13 right; 35,51 left) until owl is mounted
 ```

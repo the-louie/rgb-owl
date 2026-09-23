@@ -65,6 +65,27 @@ static void test_config_layout_is_consistent(void) {
     for (const auto& e : EYES) TEST_ASSERT_NOT_EQUAL(NO_LED, columnLedIndex(COLUMNS, e));
 }
 
+// The owl as measured on 2026-09-23 (user-confirmed ASCII diagram).
+static void test_config_matches_measured_owl(void) {
+    const auto& L = owl::config::OWL_LAYOUT;
+    TEST_ASSERT_EQUAL(62, L.numLeds);
+    TEST_ASSERT_EQUAL(6, L.width);
+    TEST_ASSERT_EQUAL(12, L.height);
+    // grid x = 5 - column; spot checks: {x, y, index}
+    const int cells[][3] = {{5, 2, 0}, {5, 11, 9}, {4, 11, 10}, {4, 1, 20}, {3, 1, 21},
+                            {3, 11, 31}, {2, 11, 32}, {2, 0, 43}, {1, 1, 44}, {1, 11, 54},
+                            {0, 6, 55}, {0, 0, 61}};
+    for (const auto& c : cells) TEST_ASSERT_EQUAL(c[2], L.index(c[0], c[1]));
+    TEST_ASSERT_EQUAL(NO_LED, L.index(5, 1));
+    TEST_ASSERT_EQUAL(NO_LED, L.index(0, 7));
+    const int eyes[] = {6, 13, 35, 51};
+    int k = 0;
+    for (const auto& e : owl::config::EYES) {
+        TEST_ASSERT_EQUAL(eyes[k++], columnLedIndex(owl::config::COLUMNS, e));
+        TEST_ASSERT_EQUAL(8, L.pos[columnLedIndex(owl::config::COLUMNS, e)].y);
+    }
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_dimensions);
@@ -73,5 +94,6 @@ int main() {
     RUN_TEST(test_pos_is_inverse_of_grid);
     RUN_TEST(test_column_led_index);
     RUN_TEST(test_config_layout_is_consistent);
+    RUN_TEST(test_config_matches_measured_owl);
     return UNITY_END();
 }

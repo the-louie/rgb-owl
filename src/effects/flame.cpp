@@ -16,7 +16,8 @@ public:
     }
 
     void render(Canvas& c, const Frame& f) override {
-        for (acc_ += f.dt; acc_ >= STEP_MS; acc_ -= STEP_MS) step();
+        // acc_ is in 1/100 ms so the speed factor keeps fractional time
+        for (acc_ += f.dt * SPEED_PCT; acc_ >= STEP_MS * 100; acc_ -= STEP_MS * 100) step();
         c.fill(CRGB::Black);
         for (int x = 0; x < W; ++x) {
             int col = W - 1 - x;  // grid x -> physical column
@@ -30,6 +31,7 @@ private:
     static constexpr int W = leds::LAYOUT.width;
     static constexpr int H = leds::LAYOUT.height;
     static constexpr uint32_t STEP_MS = 30;
+    static constexpr uint32_t SPEED_PCT = 35;  // flame runs at 0.35x the global speed
     static constexpr uint8_t COOLING = 70;   // higher = shorter flames
     static constexpr uint8_t SPARKING = 110; // higher = more vigorous
 

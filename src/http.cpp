@@ -4,6 +4,7 @@
 
 #include "app.h"
 #include "effect.h"
+#include "leds.h"
 #include "log.h"
 #include "net.h"
 
@@ -80,6 +81,17 @@ static void addRoutes() {
     web.on("/api/state", HTTP_POST, postState);
     web.on("/api/effects", HTTP_GET, getEffects);
     web.on("/api/debug", HTTP_GET, getDebug);
+    web.on("/api/frame", HTTP_GET, [] {
+        // last rendered frame, strip order, before brightness/power scaling
+        String out;
+        out.reserve(leds::LAYOUT.numLeds * 7);
+        char px[8];
+        for (int i = 0; i < leds::LAYOUT.numLeds; ++i) {
+            snprintf(px, sizeof(px), "%02x%02x%02x ", leds::strip[i].r, leds::strip[i].g, leds::strip[i].b);
+            out += px;
+        }
+        web.send(200, "text/plain", out);
+    });
     web.on("/api/log", HTTP_GET, [] { web.send(200, "text/plain", log::dump()); });
     web.on("/api/test", HTTP_POST, postTest);
     web.on("/api/reboot", HTTP_POST, [] {

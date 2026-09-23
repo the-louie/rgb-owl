@@ -27,7 +27,7 @@ facing forward through the white parts.
 
 ## LED layout
 
-- ~6 columns, up to 15 LEDs each, max ~90 LEDs total.
+- 6 columns, 62 LEDs (measured 2026-09-23): counts 10/11/11/12/11/7 right→left.
 - Zig-zag, starting **bottom-right**: column 0 is rightmost and runs **up**,
   column 1 runs **down**, alternating, progressing leftwards.
 - Columns evenly spaced; each column has its own LED count and **bottom Y offset** (ears/feet).
@@ -78,6 +78,7 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 - Debug API (open, like the web UI):
   - `GET /api/debug`: build, uptime, reset reason, heap, fps, show() time, estimated LED mA vs limit,
     brightness after power limit, effect, test mode, WiFi state/SSID/RSSI/IP
+  - `GET /api/frame`: last rendered frame, strip order, `rrggbb` per LED (before brightness/power scaling)
   - `GET /api/log`: last 4 KB of the firmware log (same lines as USB serial)
   - `POST /api/test`: `mode=none|off|solid|pixel|column|row|walk`, optional `r,g,b` and `index`
     (pixel = strip index, column = physical column 0 = rightmost, row = grid y); overrides effects until `none`
