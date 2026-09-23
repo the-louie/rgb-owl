@@ -96,3 +96,21 @@ inline ApplyResult apply(Settings& s, const char* key, const char* value, size_t
 }
 
 }  // namespace owl
+
+#include <stdio.h>
+
+namespace owl {
+
+// Writes the settings (plus the effect currently shown) as a JSON object.
+// Returns the length written, or 0 if buf is too small.
+inline size_t toJson(char* buf, size_t len, const Settings& s, size_t currentEffect) {
+    int n = snprintf(buf, len,
+                     "{\"on\":%s,\"effect\":%u,\"current\":%u,\"auto\":%s,\"interval\":%u,"
+                     "\"fade\":%u,\"brightness\":%u,\"speed\":%u,\"hue\":%u}",
+                     s.on ? "true" : "false", unsigned(s.effect), unsigned(currentEffect),
+                     s.autoCycle ? "true" : "false", unsigned(s.intervalS), unsigned(s.fadeMs),
+                     unsigned(s.brightness), unsigned(s.speed), unsigned(s.hue));
+    return (n > 0 && size_t(n) < len) ? size_t(n) : 0;
+}
+
+}  // namespace owl

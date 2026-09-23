@@ -69,6 +69,12 @@ Palette bias: pastel (desaturated) colours where the effect allows.
   retried, so a router that boots slower than the owl never leaves it stuck in setup mode.
 - Web UI (embedded single page): on/off, effect select, auto-cycle on/off, cycle interval,
   fade time, brightness, speed, breathing colour.
+- HTTP API (port 80, only while on the home network):
+  - `GET /api/state` → `{"on","effect","current","auto","interval","fade","brightness","speed","hue"}`
+    (`effect` = selected/saved, `current` = shown now)
+  - `POST /api/state` with form fields of the same names (`effect` accepts index or name) → new state,
+    or 400 `{"error"}`
+  - `GET /api/effects` → effect names in cycle order
 - OTA: ArduinoOTA (`pio run -t upload --upload-port owl.local`) and `.bin` upload in web UI.
 
 ## Software

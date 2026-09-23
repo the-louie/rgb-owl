@@ -65,6 +65,24 @@ static void test_apply_rejects(void) {
     TEST_ASSERT_TRUE(s == before);
 }
 
+static void test_to_json(void) {
+    Settings s;
+    s.on = false;
+    s.effect = 3;
+    char buf[200];
+    size_t n = toJson(buf, sizeof(buf), s, 5);
+    TEST_ASSERT_EQUAL_STRING(
+        "{\"on\":false,\"effect\":3,\"current\":5,\"auto\":true,\"interval\":60,"
+        "\"fade\":2000,\"brightness\":128,\"speed\":128,\"hue\":160}",
+        buf);
+    TEST_ASSERT_EQUAL(strlen(buf), n);
+}
+
+static void test_to_json_too_small(void) {
+    char buf[10];
+    TEST_ASSERT_EQUAL(0, toJson(buf, sizeof(buf), Settings{}, 0));
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_defaults_match_spec);
@@ -72,5 +90,7 @@ int main() {
     RUN_TEST(test_apply_clamps);
     RUN_TEST(test_apply_bools);
     RUN_TEST(test_apply_rejects);
+    RUN_TEST(test_to_json);
+    RUN_TEST(test_to_json_too_small);
     return UNITY_END();
 }

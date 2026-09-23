@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 #include "app.h"
+#include "http.h"
 #include "net.h"
 
 void setup() {
@@ -12,4 +13,5 @@ void setup() {
 void loop() {
     owl::app::loop();
     owl::net::loop();
+    owl::http::loop();
 }
