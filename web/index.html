@@ -47,6 +47,12 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 <div id="hue"></div>
 <input type="range" id="hueIn" min="0" max="255">
 </section>
+<section>
+<h2>Firmware</h2>
+<input type="file" id="bin" accept=".bin">
+<button id="upd">Upload</button>
+<label><b id="updV"></b></label>
+</section>
 <div id="msg"></div>
 </main>
 <script>
@@ -117,6 +123,19 @@ for (const [id, key] of [['interval', 'interval'], ['fade', 'fade'], ['brightnes
   el.oninput = () => { dragging = true; send(key, el.value); render(); };
   el.onchange = () => { dragging = false; };
 }
+$('upd').onclick = async () => {
+  const f = $('bin').files[0];
+  if (!f) return;
+  const fd = new FormData();
+  fd.append('firmware', f);
+  $('updV').textContent = 'Uploading…';
+  try {
+    const r = await fetch('/update', { method: 'POST', body: fd });
+    $('updV').textContent = r.ok ? 'Done, restarting…' : 'Update failed';
+  } catch (e) {
+    $('updV').textContent = 'Update failed';
+  }
+};
 load();
 setInterval(poll, 3000);
 </script>

@@ -78,7 +78,7 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 ```sh
 pio run                                      # build
 pio run -t upload                            # USB (first time: hold BOOT while plugging in)
-pio run -t upload --upload-port owl.local    # OTA, once firmware is running
+pio run -e s3zero-ota -t upload              # OTA to owl.local, once firmware is running
 pio device monitor                           # USB CDC serial
 ```
 
@@ -172,4 +172,5 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | EVENT    | T-03: FastLED driver in firmware = 35.7% of 1.9 MB app slot
 2026-09-23 | DECISION | WiFi policy: 15 s STA attempt -> Owl-Setup portal for 5 min -> retry STA (agent decision, closes gap: router down at boot)
 2026-09-23 | EVENT    | T-15: WiFi stack raises flash to 65.3% of 1.9 MB slot (default.csv 1.25 MB would not fit)
+2026-09-23 | OPEN     | OTA/web auth: none for now (anyone on home LAN can reflash); needs user decision
 ```

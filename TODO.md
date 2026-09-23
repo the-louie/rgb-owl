@@ -77,7 +77,8 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - ~~**Settings model + NVS persistence, debounced 5 s**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-13/T-14):** `lib/owl/src/owl/settings.h`, `src/settings_store.cpp`, `src/app.cpp` (`saver.due` → `store::save`). Original row kept for the record: Settings model + NVS persistence, debounced 5 s (SPEC §Behaviour)
 - ~~**WiFi: WiFiManager captive portal `Owl-Setup`, STA, mDNS `owl.local`**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-15):** `src/net.cpp` (`startConfigPortal(SETUP_AP)`, `MDNS.begin(HOSTNAME)`), policy `lib/owl/src/owl/wifi_fsm.h`. Original row kept for the record: WiFi: WiFiManager captive portal `Owl-Setup`, STA, mDNS `owl.local` (SPEC §Connectivity)
 - ~~**Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-16/T-17):** `src/http.cpp` (`/`, `/api/state`, `/api/effects`), `web/index.html`; headless-Chrome smoke test against a mock API: 7 effect buttons, 3 POSTs, no JS errors, no horizontal scroll at 390 px. Original row kept for the record: Web UI + JSON API: on/off, effect, auto-cycle, interval, fade, brightness, speed, colour (SPEC §Connectivity)
-- **OTA: ArduinoOTA + `.bin` upload endpoint** (SPEC §Connectivity)
+- ~~**OTA: ArduinoOTA + `.bin` upload endpoint**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-18):** `src/ota.cpp` (`ArduinoOTA.begin`, `/update` handler), `[env:s3zero-ota]` in `platformio.ini`. Original row kept for the record: OTA: ArduinoOTA + `.bin` upload endpoint (SPEC §Connectivity)
+- **OTA / web UI authentication** (needs user decision: none (current) vs OTA password vs HTTP basic auth; anyone on the home LAN can currently reflash the owl)
 - **Real layout values in `layout.h`** (blocked: user must place the strip first)
 
 ## Retros
