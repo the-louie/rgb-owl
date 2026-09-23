@@ -1,5 +1,7 @@
 # AGENTS.md — RGB Owl Light Sign
 
+For all commands assume '/lr', unless explicitly stated 'be verbose'
+
 Guidance for any coding agent working in this repo. Read this first; load the
 referenced docs only when the task needs them.
 
