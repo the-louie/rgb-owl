@@ -88,7 +88,8 @@ Board config: `board = esp32-s3-devkitc-1` with `board_upload.flash_size = 4MB`,
 (src/ is not built for tests, so keep testable logic Arduino-free in `lib/`).
 FastLED does not compile on host (3.10.5 stub layer), so effect rendering stays in `src/`.
 Constants: `include/config.h`; layout: `include/layout.h`; user settings + defaults:
-`lib/owl/src/owl/settings.h`. `src/app.cpp` owns the render loop and settings; other
+`lib/owl/src/owl/settings.h`. Web UI source: `web/index.html` (embedded via
+`board_build.embed_txtfiles`, served at `/`). `src/app.cpp` owns the render loop and settings; other
 modules change settings only through `app::set(key, value)`.
 
 Installed toolchain (user-level, verified 2026-09-23):

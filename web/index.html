@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Owl</title>
+<style>
+:root{--bg:#15131c;--card:#221f2c;--fg:#ece8f5;--mute:#9a93ad;--acc:#b9a7ff;--on:#9fe3c1}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.4 system-ui,sans-serif}
+main{max-width:480px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 16px;display:flex;justify-content:space-between;align-items:center}
+section{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--mute);margin:0 0 10px}
+.fx{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+button{font:inherit;color:var(--fg);background:#2e2a3b;border:2px solid transparent;border-radius:10px;padding:10px;cursor:pointer}
+button.sel{border-color:var(--acc)}
+button.cur{background:#3b3453}
+label{display:block;margin:10px 0 2px;color:var(--mute);font-size:14px}
+label b{color:var(--fg);font-weight:500;float:right}
+input[type=range]{width:100%;accent-color:var(--acc)}
+.sw{display:flex;align-items:center;gap:10px;margin:6px 0}
+.sw input{width:22px;height:22px;accent-color:var(--on)}
+#hue{height:14px;border-radius:7px;background:linear-gradient(90deg,hsl(0 70% 80%),hsl(60 70% 80%),hsl(120 70% 80%),hsl(180 70% 80%),hsl(240 70% 80%),hsl(300 70% 80%),hsl(360 70% 80%))}
+#msg{color:#ffb4b4;min-height:1.2em;font-size:14px}
+</style>
+</head>
+<body>
+<main>
+<h1>🦉 Owl <span class="sw"><input type="checkbox" id="on"><span>On</span></span></h1>
+<section>
+<h2>Effect</h2>
+<div class="fx" id="fx"></div>
+<div class="sw"><input type="checkbox" id="auto"><span>Auto-cycle</span></div>
+<label>Time per effect <b id="intervalV"></b></label>
+<input type="range" id="interval" min="5" max="600" step="5">
+<label>Crossfade <b id="fadeV"></b></label>
+<input type="range" id="fade" min="0" max="10000" step="250">
+</section>
+<section>
+<h2>Look</h2>
+<label>Brightness <b id="brightnessV"></b></label>
+<input type="range" id="brightness" min="1" max="255">
+<label>Speed <b id="speedV"></b></label>
+<input type="range" id="speed" min="0" max="255">
+<label>Breathing colour <b id="hueV"></b></label>
+<div id="hue"></div>
+<input type="range" id="hueIn" min="0" max="255">
+</section>
+<div id="msg"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+let names = [], state = {}, pending = {}, timer = null, dragging = false;
+const fmt = {
+  interval: v => v >= 60 ? (v / 60).toFixed(v % 60 ? 1 : 0) + ' min' : v + ' s',
+  fade: v => (v / 1000).toFixed(v % 1000 ? 2 : 0) + ' s',
+  brightness: v => Math.round(v / 2.55) + ' %',
+  speed: v => (v / 128).toFixed(2) + '×',
+  hue: v => v,
+};
+function render() {
+  $('on').checked = state.on;
+  $('auto').checked = state.auto;
+  for (const k of ['interval', 'fade', 'brightness', 'speed']) {
+    if (!dragging) $(k).value = state[k];
+    $(k + 'V').textContent = fmt[k](+$(k).value);
+  }
+  if (!dragging) $('hueIn').value = state.hue;
+  $('hueV').textContent = $('hueIn').value;
+  [...$('fx').children].forEach((b, i) => {
+    b.classList.toggle('sel', i === state.effect);
+    b.classList.toggle('cur', i === state.current);
+  });
+}
+async function api(path, body) {
+  try {
+    const r = await fetch(path, body ? { method: 'POST', body: new URLSearchParams(body) } : {});
+    const j = await r.json();
+    if (!r.ok) throw new Error(j.error || r.status);
+    $('msg').textContent = '';
+    return j;
+  } catch (e) {
+    $('msg').textContent = 'Error: ' + e.message;
+  }
+}
+function send(k, v) {
+  pending[k] = v;
+  clearTimeout(timer);
+  timer = setTimeout(async () => {
+    const body = pending;
+    pending = {};
+    const s = await api('/api/state', body);
+    if (s) { state = s; render(); }
+  }, 120);
+}
+async function load() {
+  names = (await api('/api/effects')) || [];
+  $('fx').innerHTML = '';
+  names.forEach((n, i) => {
+    const b = document.createElement('button');
+    b.textContent = n;
+    b.onclick = () => { state.effect = i; render(); send('effect', i); };
+    $('fx').appendChild(b);
+  });
+  await poll();
+}
+async function poll() {
+  if (dragging || Object.keys(pending).length) return;
+  const s = await api('/api/state');
+  if (s) { state = s; render(); }
+}
+$('on').onchange = e => send('on', e.target.checked ? 1 : 0);
+$('auto').onchange = e => send('auto', e.target.checked ? 1 : 0);
+for (const [id, key] of [['interval', 'interval'], ['fade', 'fade'], ['brightness', 'brightness'], ['speed', 'speed'], ['hueIn', 'hue']]) {
+  const el = $(id);
+  el.oninput = () => { dragging = true; send(key, el.value); render(); };
+  el.onchange = () => { dragging = false; };
+}
+load();
+setInterval(poll, 3000);
+</script>
+</body>
+</html>

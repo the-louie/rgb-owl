@@ -8,6 +8,8 @@
 
 namespace owl::http {
 
+extern const char INDEX_HTML[] asm("_binary_web_index_html_start");
+
 static WebServer web(80);
 static bool running = false;
 static bool routed = false;
@@ -54,6 +56,7 @@ static void getEffects() {
 }
 
 static void addRoutes() {
+    web.on("/", HTTP_GET, [] { web.send(200, "text/html", INDEX_HTML); });
     web.on("/api/state", HTTP_GET, [] { sendState(); });
     web.on("/api/state", HTTP_POST, postState);
     web.on("/api/effects", HTTP_GET, getEffects);
