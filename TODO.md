@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 02, in progress (opened 2026-09-23)
-**Current ticket:** T-11 (`todo` — Owl eyes (glow + random blink, `EYES[]`))
+**Current ticket:** T-11 (`in-progress` — Owl eyes (glow + random blink, `EYES[]`))
 **Last completed:** T-10 (`done` — commit `4a67765`)
 
 ## Conventions
@@ -51,7 +51,7 @@ On hardware, after the boot walk the owl cycles through 7 effects, 60 s each, wi
 | T-08 | Aurora (pastel noise bands) | 2h | — | done | SPEC §Effects 4; Landed in `0abe358` |
 | T-09 | Rainbow sweep + twinkle | 2h | — | done | SPEC §Effects 6; Landed in `a7a6c33` |
 | T-10 | Breathing solid pastel colour | 1h | — | done | SPEC §Effects 7; Landed in `4a67765` |
-| T-11 | Owl eyes (glow + random blink, `EYES[]`) | 2h | — | todo | SPEC §Effects 5 |
+| T-11 | Owl eyes (glow + random blink, `EYES[]`) | 2h | — | in-progress | SPEC §Effects 5 |
 | T-12 | Auto-cycle scheduler + crossfade (60 s / 2 s, adjustable) + native tests | 3h | — | todo | SPEC §Behaviour |
 
 ## Sprint 03 — connectivity (sketch)
