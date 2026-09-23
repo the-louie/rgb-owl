@@ -70,7 +70,8 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 
 - PlatformIO, `espressif32` platform, Arduino framework, FastLED (RMT driver).
 - Board: `esp32-s3-devkitc-1` overridden to 4 MB flash, USB CDC on boot.
-- Partition table with two OTA slots.
+- Partition table `min_spiffs.csv`: two 1.9 MB OTA app slots, 128 KB SPIFFS (unused).
+- Host unit tests: `[env:native]` with Unity; hardware-independent logic lives in `lib/`.
 - Toolchain verified 2026-09-23: FastLED smoke build OK (RAM 7.9 %, flash 53 %).
 
 ## Reference docs

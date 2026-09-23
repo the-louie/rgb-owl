@@ -74,8 +74,9 @@ pio device monitor                           # USB CDC serial
 ```
 
 Board config: `board = esp32-s3-devkitc-1` with `board_upload.flash_size = 4MB`,
-`-DARDUINO_USB_CDC_ON_BOOT=1 -DARDUINO_USB_MODE=1`, and a 4 MB partition table with
-two OTA slots.
+`-DARDUINO_USB_CDC_ON_BOOT=1 -DARDUINO_USB_MODE=1`, partitions `min_spiffs.csv`
+(2 × 1.9 MB OTA slots). `pio test -e native` runs Unity tests in `test/` against `lib/`
+(src/ is not built for tests, so keep testable logic Arduino-free in `lib/`).
 
 Installed toolchain (user-level, verified 2026-09-23):
 - PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17
