@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 02, in progress (opened 2026-09-23)
-**Current ticket:** T-06 (`in-progress` — Matrix green rain)
-**Last completed:** T-05 (`done` — commit `0b53a8f`)
+**Current ticket:** T-07 (`todo` — Flame (per-column heat, Fire2012-style, grid-aware))
+**Last completed:** T-06 (`done` — commit `c054c58`)
 
 ## Conventions
 
@@ -46,7 +46,7 @@ On hardware, after the boot walk the owl cycles through 7 effects, 60 s each, wi
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-06 | Matrix green rain | 2h | — | in-progress | SPEC §Effects 2 |
+| T-06 | Matrix green rain | 2h | — | done | SPEC §Effects 2; Landed in `c054c58` |
 | T-07 | Flame (per-column heat, Fire2012-style, grid-aware) | 3h | — | todo | SPEC §Effects 3 |
 | T-08 | Aurora (pastel noise bands) | 2h | — | todo | SPEC §Effects 4 |
 | T-09 | Rainbow sweep + twinkle | 2h | — | todo | SPEC §Effects 6 |
