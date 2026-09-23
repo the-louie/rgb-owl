@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** Sprint 02, in progress (opened 2026-09-23)
+**Active sprint:** Sprint 03, in progress (opened 2026-09-23)
 **Current ticket:** —
 **Last completed:** T-12 (`done` — commit `74b8910`)
 
@@ -38,7 +38,7 @@ column-walk test pattern confirms the zig-zag layout, then plasma runs.
 | T-04 | Effect interface + registry, hardware-independent where possible + native tests | 2h | T-02 | done | Landed in `6dead73` |
 | T-05 | Pastel plasma effect | 2h | T-03, T-04 | done | SPEC §Effects 1; Landed in `0b53a8f` |
 
-## Sprint 02 — effects + auto-cycle
+## Sprint 02 — effects + auto-cycle (done 2026-09-23)
 
 **Goal:** All 7 SPEC effects render and auto-cycle with a crossfade.
 **Demo:** `pio run -e s3zero` builds and `pio test -e native` passes (scheduler/crossfade tests).
@@ -54,9 +54,21 @@ On hardware, after the boot walk the owl cycles through 7 effects, 60 s each, wi
 | T-11 | Owl eyes (glow + random blink, `EYES[]`) | 2h | — | done | SPEC §Effects 5; Landed in `d424447` |
 | T-12 | Auto-cycle scheduler + crossfade (60 s / 2 s, adjustable) + native tests | 3h | — | done | SPEC §Behaviour; Landed in `74b8910` |
 
-## Sprint 03 — connectivity (sketch)
+## Sprint 03 — connectivity
 
-Goal: settings in NVS, WiFi with captive portal + mDNS, web UI + JSON API, OTA. Drawn from the backlog.
+**Goal:** Control the owl from a phone. Settings survive power loss, and firmware updates go over WiFi.
+**Demo:** gate passes (settings/debounce tests). On hardware: first boot opens the `Owl-Setup`
+portal; after joining WiFi, `http://owl.local` changes effect, brightness and speed live; the settings
+survive a power cycle; `pio run -t upload --upload-port owl.local` works.
+
+| ID | Title | Est | Deps | Status | Notes |
+|---|---|---|---|---|---|
+| T-13 | Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests | 2h | — | todo | Backlog row 1 |
+| T-14 | NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue | 3h | T-13 | todo | Backlog row 1 |
+| T-15 | WiFi: WiFiManager non-blocking portal `Owl-Setup`, STA, hostname + mDNS `owl.local` | 3h | — | todo | Backlog row 2 |
+| T-16 | HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects` | 2h | T-14, T-15 | todo | Backlog row 3 |
+| T-17 | Web UI: embedded single page using the API | 3h | T-16 | todo | Backlog row 3 |
+| T-18 | OTA: ArduinoOTA (`owl.local`) + `POST /update` .bin upload | 2h | T-15, T-16 | todo | Backlog row 4 |
 
 ## Backlog
 
@@ -79,3 +91,14 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
   Mitigation: keep the maths that can be tested (scheduler, fade weights) in `lib/owl`.
 - **Backlog:** 0 rows closed (Sprint 01 came from SPEC, not backlog rows), 0 added. Open: 4 plus 1 blocked.
 - **Next:** Sprint 02 effects. The column walk becomes the tool for filling in the real `layout.h`.
+
+### Sprint 02 (2026-09-23)
+
+- **Demo:** 28 native tests pass. The s3zero build uses RAM 8.4 % and flash 36.2 %. The 7 effects
+  cycle every 60 s with a 2 s crossfade after the boot walk. Visuals are **unverified on hardware**.
+- **Worked:** logic that can be tested (blink envelope, cycler) lives in `lib/owl`, with 13 new tests.
+  One file per effect in `src/effects/`.
+- **Didn't:** effect visuals are tuned blind (speeds, colours, thresholds). Expect a tuning pass once flashed.
+- **Backlog:** 0 closed, 0 added. The 4 open rows are verified still open (no WiFi/NVS/OTA code in `src/`)
+  and scheduled as Sprint 03. `layout.h` values are still blocked on the user.
+- **Next:** Sprint 03 connectivity. The breathing hue needs a setter reachable from settings.
