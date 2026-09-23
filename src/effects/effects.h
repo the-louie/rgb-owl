@@ -7,5 +7,6 @@ namespace owl::effects {
 
 Effect& plasma();
 Effect& rain();
+Effect& flame();
 
 }  // namespace owl::effects

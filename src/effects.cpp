@@ -6,6 +6,7 @@ namespace owl {
 static Effect* const ALL[] = {
     &effects::plasma(),
     &effects::rain(),
+    &effects::flame(),
 };
 const Registry<Effect> EFFECTS(ALL);
 
