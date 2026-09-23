@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 03, in progress (opened 2026-09-23)
-**Current ticket:** —
+**Current ticket:** T-13 (`in-progress` — Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests)
 **Last completed:** T-12 (`done` — commit `74b8910`)
 
 ## Conventions
@@ -63,7 +63,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-13 | Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests | 2h | — | todo | Backlog row 1 |
+| T-13 | Settings model: fields, defaults, clamping, `apply(key, value)` from strings + native tests | 2h | — | in-progress | Backlog row 1 |
 | T-14 | NVS persistence (Preferences), 5 s debounce (logic in lib, tested); settings drive brightness/speed/cycle/on-off/breathing hue | 3h | T-13 | todo | Backlog row 1 |
 | T-15 | WiFi: WiFiManager non-blocking portal `Owl-Setup`, STA, hostname + mDNS `owl.local` | 3h | — | todo | Backlog row 2 |
 | T-16 | HTTP API (WebServer): `GET /api/state`, `POST /api/state` (form params), `GET /api/effects` | 2h | T-14, T-15 | todo | Backlog row 3 |
