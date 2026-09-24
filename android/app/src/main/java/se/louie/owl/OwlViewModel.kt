@@ -45,6 +45,7 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
         }
         viewModelScope.launch {
             client.events.collect { e ->
+                _update.value = _update.value.on(e)
                 when (e.type) {
                     "error" -> {
                         _error.value = "${e.verb}: ${e.msg}"
@@ -148,6 +149,15 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
             "tz" to se.louie.owl.time.PosixTz.of(java.time.ZoneId.systemDefault()),
         ),
     )
+
+    private val _update = MutableStateFlow(se.louie.owl.update.UpdateView())
+    val update: StateFlow<se.louie.owl.update.UpdateView> = _update.asStateFlow()
+
+    /** Checks now; the owl installs a newer signed release by itself. */
+    fun checkUpdate() {
+        _update.value = _update.value.startCheck()
+        send("update_check")
+    }
 
     fun setProject(url: String) = send(Protocol.command("project", "url" to url))
 

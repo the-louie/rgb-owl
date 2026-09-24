@@ -94,6 +94,23 @@ fun SettingsScreen(vm: OwlViewModel) {
             modifier = Modifier.fillMaxWidth(),
         )
         Button(onClick = { vm.setProject(url.trim()) }, enabled = url.trim() != (project ?: "")) { Text("Save project") }
+        val update by vm.update.collectAsState()
+        Text("Installed: ${s.version}")
+        update.latest?.let { Text("Latest release: $it") }
+        if (update.phase == "downloading" || update.phase == "verifying") {
+            androidx.compose.material3.LinearProgressIndicator(
+                progress = { update.percent / 100f },
+                modifier = Modifier.fillMaxWidth(),
+            )
+        }
+        update.message?.let { Text(it) }
+        Button(onClick = vm::checkUpdate, enabled = !update.checking && !project.isNullOrEmpty()) {
+            Text(if (update.checking) "Working…" else "Check for update")
+        }
+        Text(
+            "A newer release is installed automatically. The owl also checks at every start and once a day.",
+            style = MaterialTheme.typography.bodySmall,
+        )
     }
 }
 
