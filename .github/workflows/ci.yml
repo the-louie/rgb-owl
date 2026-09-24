@@ -37,7 +37,7 @@ jobs:
       - name: Install PlatformIO
         run: pip install platformio
 
-      - name: Secrets (placeholders unless this is a release)
+      - name: Secrets (placeholders unless this is a CI-built release)
         env:
           OTA: ${{ secrets.OWL_OTA_PASSWORD }}
           PIN: ${{ secrets.OWL_BLE_PIN }}
@@ -57,8 +57,16 @@ jobs:
         if: github.ref_type != 'tag'
         run: tools/build-app.sh debug
 
-      - name: Release artifacts
+      - name: Release already published? (./publish.sh creates it locally)
+        id: existing
         if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$GITHUB_REF_NAME" > /dev/null 2>&1; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+
+      - name: Release artifacts
+        if: github.ref_type == 'tag' && steps.existing.outputs.skip != 'true'
         env:
           OWL_SIGNING_KEY: ${{ secrets.OWL_SIGNING_KEY }}
           OWL_KEYSTORE_PASSWORD: ${{ secrets.OWL_KEYSTORE_PASSWORD }}
@@ -70,7 +78,7 @@ jobs:
           test "$(cat dist/release/VERSION)" = "${GITHUB_REF_NAME#v}"  # tag must be HEAD's version
 
       - name: Publish release
-        if: github.ref_type == 'tag'
+        if: github.ref_type == 'tag' && steps.existing.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |

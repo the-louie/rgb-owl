@@ -96,6 +96,9 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 
 ## Releases
 
+`./publish.sh X.Y.Z[-pre] [--ci]` is the entry point: it checks for a clean `main`, no secrets in
+history and signing keys, then tags, builds locally, pushes and creates the release (or with `--ci`
+pushes only and lets Actions build). Remote: `origin` = git@github.com:the-louie/rgb-owl.git.
 `tools/release.sh` builds `dist/release/` (owl-firmware.bin + .sig, owl-s3zero-merged.bin, owl-app.apk,
 VERSION). CI (`.github/workflows/ci.yml`) runs the tests and builds on every push. A pushed tag `vX.Y.Z`
 (or `vX.Y.Z-rc.N` for a pre-release) runs `tools/release.sh` with repo secrets and publishes the release.
