@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import se.louie.owl.ble.Connection
 import se.louie.owl.ui.ConnectScreen
+import se.louie.owl.ui.MainScreen
 
 class MainActivity : ComponentActivity() {
     private val vm: OwlViewModel by viewModels()
@@ -50,23 +51,11 @@ class MainActivity : ComponentActivity() {
                             Button(onClick = { request.launch(permissions) }) { Text("Grant") }
                         }
                         !vm.client.bluetoothEnabled -> Text("Turn on Bluetooth.", Modifier.padding(16.dp))
-                        connection is Connection.Ready -> ConnectedPlaceholder(vm)
+                        connection is Connection.Ready -> MainScreen(vm)
                         else -> ConnectScreen(vm)
                     }
                 }
             }
         }
-    }
-}
-
-/** Replaced by the Main screen (T-26). */
-@androidx.compose.runtime.Composable
-private fun ConnectedPlaceholder(vm: OwlViewModel) {
-    val state by vm.client.state.collectAsState()
-    val effects by vm.client.effects.collectAsState()
-    Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text("Connected", style = MaterialTheme.typography.headlineSmall)
-        Text("Firmware ${state?.version}; showing ${effects.getOrNull(state?.current ?: -1)}")
-        Button(onClick = { vm.forget() }) { Text("Forget this owl") }
     }
 }
