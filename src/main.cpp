@@ -3,6 +3,7 @@
 #include "app.h"
 #include "ble.h"
 #include "clock.h"
+#include "crash.h"
 #include "http.h"
 #include "net.h"
 #include "ota.h"
@@ -10,6 +11,7 @@
 
 void setup() {
     Serial.begin(115200);
+    owl::crash::begin();
     owl::clock::begin();
     owl::app::begin();
     owl::reset::begin();

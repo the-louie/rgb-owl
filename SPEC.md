@@ -86,6 +86,8 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   (`CET-1CEST,M3.5.0,M10.5.0/3`) until the phone sends its own; NTP (pool.ntp.org) syncs while WiFi is up. Each command also gets
   `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is the HTTP state plus `"wifi"` (status),
   `"devmode"`, `"version"`; keep it ≤ 240 bytes (notifications are cut at MTU − 3).
+- `debug` → two `debug` events (uptime_s, reset, heap, fps, ma, ip / last_crash, last_crash_time,
+  crashes, rssi, bonds), each under the notification size limit.
 - Debug: `POST /api/cmd line=<command>` runs a command over HTTP (debug mode); events are logged.
 
 ### Android app (Kotlin + Jetpack Compose, minSdk 31, Android only)

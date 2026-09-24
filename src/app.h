@@ -23,6 +23,9 @@ size_t currentEffect();
 //   column (index = physical column, 0 = rightmost) | row (index = grid y, 0 = bottom) | walk
 // Colour defaults to white-ish when r,g,b are all 0. Returns false for a bad mode/index.
 bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index);
+// Estimated LED current (mA) of the last frame, and frames per second.
+uint32_t estimatedMilliamps();
+uint32_t fps();
 // Appends the app's debug fields ("key":value,...) to a JSON object body.
 void appendDebug(String& json);
 

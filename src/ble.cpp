@@ -9,6 +9,7 @@
 #include "net.h"
 #include "clock.h"
 #include "config.h"
+#include "crash.h"
 #include "owl/pairing.h"
 #include "owl/protocol.h"
 
@@ -155,6 +156,20 @@ static void handle(const char* line) {
             .num("night_from", s.nightFrom).num("night_to", s.nightTo).boolean("time_set", clock::valid())
             .str("tz", clock::tz().c_str());
         if (const char* j = w.finish()) sendEvent(j);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "debug")) {  // two events, each under the notification size limit
+        char buf[240];
+        JsonWriter a(buf, sizeof(buf));
+        a.str("type", "debug").num("uptime_s", long(millis() / 1000)).str("reset", crash::resetReason())
+            .num("heap", long(ESP.getFreeHeap())).num("fps", long(app::fps())).num("ma", long(app::estimatedMilliamps()))
+            .str("ip", net::online() ? WiFi.localIP().toString().c_str() : "");
+        if (const char* j = a.finish()) sendEvent(j);
+        JsonWriter b(buf, sizeof(buf));
+        b.str("type", "debug").str("last_crash", crash::lastReason()).num("last_crash_time", long(crash::lastTime()))
+            .num("crashes", long(crash::count())).num("rssi", net::online() ? WiFi.RSSI() : 0)
+            .num("bonds", NimBLEDevice::getNumBonds());
+        if (const char* j = b.finish()) sendEvent(j);
         return sendResult(verb, nullptr);
     }
     if (!strcmp(verb, "time")) {  // time epoch=<unix seconds>&tz=<POSIX TZ>

@@ -9,6 +9,7 @@
 #include "leds.h"
 #include "ble.h"
 #include "clock.h"
+#include "crash.h"
 #include "net.h"
 #include "owl/boot_status.h"
 #include "owl/cycle.h"
@@ -135,21 +136,6 @@ static void renderEffects(uint32_t dt) {
     }
 }
 
-static const char* resetReason() {
-    switch (esp_reset_reason()) {
-        case ESP_RST_POWERON: return "power-on";
-        case ESP_RST_SW: return "software";
-        case ESP_RST_PANIC: return "panic";
-        case ESP_RST_INT_WDT: return "interrupt-watchdog";
-        case ESP_RST_TASK_WDT: return "task-watchdog";
-        case ESP_RST_WDT: return "watchdog";
-        case ESP_RST_BROWNOUT: return "brownout";
-        case ESP_RST_DEEPSLEEP: return "deep-sleep";
-        case ESP_RST_EXT: return "external";
-        default: return "other";
-    }
-}
-
 void begin() {
     store::load(cfg);
     if (cfg.effect >= EFFECTS.size()) cfg.effect = 0;
@@ -159,7 +145,7 @@ void begin() {
     cycler.update(cfg.fadeMs);  // start on the saved effect without a fade
     random16_set_seed(uint16_t(esp_random()));
     bootMs = lastMs = millis();
-    log::printf("owl: boot, version %s, reset reason %s", OWL_VERSION, resetReason());
+    log::printf("owl: boot, version %s, reset reason %s", OWL_VERSION, crash::resetReason());
     log::printf("owl: %u LEDs, grid %ux%u, %u effects", leds::LAYOUT.numLeds,
                   leds::LAYOUT.width, leds::LAYOUT.height, unsigned(EFFECTS.size()));
 }
@@ -230,28 +216,39 @@ bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index) {
     return true;
 }
 
+uint32_t estimatedMilliamps() {
+    const auto& L = leds::LAYOUT;
+    uint32_t mW = calculate_unscaled_power_mW(leds::output, L.numLeds);
+    uint8_t b = calculate_max_brightness_for_power_mW(leds::output, L.numLeds, cfg.brightness,
+                                                      config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
+    return uint32_t(uint64_t(mW) * b / 255 / config::LED_VOLTS);
+}
+
+uint32_t fps() { return stats.fps(); }
+
 void appendDebug(String& j) {
     const auto& L = leds::LAYOUT;
     // output holds the gamma-mapped frame; FastLED applies correction, brightness + power limit at show()
     uint32_t mW = calculate_unscaled_power_mW(leds::output, L.numLeds);
     uint8_t limited = calculate_max_brightness_for_power_mW(
         leds::output, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
-    char buf[640];
+    char buf[768];
     snprintf(buf, sizeof(buf),
              "\"version\":\"%s\",\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
              "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
              "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
              "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_status\":%s,"
              "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
-             "\"power_limit_ma\":%lu,\"correction\":\"%06lx\",\"gamma\":%.2f",
-             OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
+             "\"power_limit_ma\":%lu,\"last_crash\":\"%s\",\"last_crash_time\":%lu,\"crashes\":%lu,\"correction\":\"%06lx\",\"gamma\":%.2f",
+             OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), crash::resetReason(),
              unsigned(ESP.getFreeHeap()), unsigned(ESP.getMinFreeHeap()),
              unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
              (unsigned long)stats.fps(), (unsigned long)stats.maxFrameUs(), L.numLeds, L.width,
              L.height, config::LED_PIN, unsigned(FASTLED_VERSION), EFFECTS[cycler.current()].name(),
              TEST_NAMES[int(test)], booting ? "true" : "false", cfg.brightness, limited,
              (unsigned long)(uint64_t(mW) * limited / 255 / config::LED_VOLTS),
-             (unsigned long)config::LED_MAX_MILLIAMPS, (unsigned long)leds::correction(),
+             (unsigned long)config::LED_MAX_MILLIAMPS, crash::lastReason(), (unsigned long)crash::lastTime(),
+             (unsigned long)crash::count(), (unsigned long)leds::correction(),
              double(leds::gamma()));
     j += buf;
 }
