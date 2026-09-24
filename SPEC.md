@@ -72,6 +72,11 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
 - Characteristics: `state` (read/notify, JSON: settings + shown effect + firmware version + update/WiFi
   status), `command` (write, `verb key=value&key=value`, URL-encoded), `event` (notify, JSON replies:
   WiFi scan list, test result, update progress, errors), `effects` (read, JSON names).
+- UUIDs in `src/ble.h` (base `4f574c00-8a1b-4c2e-9d3f-2b1a6c7e00xx`: 01 service, 02 state, 03 command,
+  04 event, 05 effects). Links that are not authenticated within 30 s are dropped.
+- Verbs so far: `get` (push state), `set k=v&…` (Settings keys as in the HTTP API; `effect` takes an
+  index or a name). Each command gets an event `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is
+  the HTTP state plus `"version"`.
 
 ### Android app (Kotlin + Jetpack Compose, minSdk 31, Android only)
 - **Main:** on/off, effect grid (selected + currently shown), auto-cycle.
