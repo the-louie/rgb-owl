@@ -1,6 +1,7 @@
 #include "ble.h"
 
 #include <NimBLEDevice.h>
+#include <WiFi.h>
 
 #include "app.h"
 #include "effect.h"
@@ -80,6 +81,7 @@ class CommandCallbacks : public NimBLECharacteristicCallbacks {
 };
 
 static void sendEvent(const char* json) {
+    if (net::devmode()) log::printf("event: %s", json);
     eventChr->setValue(reinterpret_cast<const uint8_t*>(json), strlen(json));
     eventChr->notify();
 }
@@ -97,8 +99,13 @@ static String stateJson() {
     size_t n = toJson(buf, sizeof(buf) - 40, app::settings(), app::currentEffect());
     if (!n) return "{}";
     String s(buf);
-    s.remove(s.length() - 1);  // reopen the object to append the version
+    s.remove(s.length() - 1);  // reopen the object to append more fields
+    s += ",\"wifi\":\"";
+    s += net::statusName();
+    s += "\",\"devmode\":";
+    s += net::devmode() ? "true" : "false";
     s += ",\"version\":\"" OWL_VERSION "\"}";
+    if (s.length() > 240) log::printf("ble: state is %u bytes, notifications cut at MTU-3", s.length());
     return s;
 }
 
@@ -130,6 +137,32 @@ static void handle(const char* line) {
             if (r == ApplyResult::BadValue) return sendResult(verb, "bad value");
         }
         pushState(false);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "wifi_scan")) {
+        if (!net::startScan()) return sendResult(verb, "wifi busy");
+        return sendResult(verb, nullptr);  // networks follow as wifi_net events
+    }
+    if (!strcmp(verb, "wifi_test") || !strcmp(verb, "wifi_save")) {
+        const char* ssid = cmd.get("ssid");
+        const char* pass = cmd.get("pass");
+        if (!ssid || !pass) return sendResult(verb, "missing ssid or pass");
+        if (verb[5] == 't') return sendResult(verb, net::startTest(ssid, pass) ? nullptr : "wifi busy");
+        if (!net::saveTested(ssid, pass)) return sendResult(verb, "test these credentials first");
+        pushState(true);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "wifi_forget")) {
+        net::forgetCredentials();
+        pushState(true);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "wifi_info")) {
+        char buf[200];
+        JsonWriter w(buf, sizeof(buf));
+        w.str("type", "wifi_info").boolean("configured", net::configured()).str("ssid", net::ssidName().c_str())
+            .str("status", net::statusName()).str("ip", net::online() ? WiFi.localIP().toString().c_str() : "");
+        if (const char* j = w.finish()) sendEvent(j);
         return sendResult(verb, nullptr);
     }
     if (!strcmp(verb, "devmode")) {
@@ -170,6 +203,7 @@ void begin() {
     svc->createCharacteristic(EFFECTS_UUID, R)->setValue(names.c_str());
     svc->start();
     pushState(true);
+    net::setEventSink(sendEvent);
 
     NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
     adv->addServiceUUID(SERVICE_UUID);
@@ -177,6 +211,8 @@ void begin() {
     adv->start();
     log::printf("ble: advertising as Owl, %d bonded phone(s)", NimBLEDevice::getNumBonds());
 }
+
+void execute(const char* line) { handle(line); }
 
 void loop() {
     char line[Command::MAX_LEN + 1];

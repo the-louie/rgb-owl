@@ -74,9 +74,14 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   WiFi scan list, test result, update progress, errors), `effects` (read, JSON names).
 - UUIDs in `src/ble.h` (base `4f574c00-8a1b-4c2e-9d3f-2b1a6c7e00xx`: 01 service, 02 state, 03 command,
   04 event, 05 effects). Links that are not authenticated within 30 s are dropped.
-- Verbs so far: `get` (push state), `set k=v&…` (Settings keys as in the HTTP API; `effect` takes an
-  index or a name). Each command gets an event `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is
-  the HTTP state plus `"version"`.
+- Verbs: `get` (push state), `set k=v&…` (Settings keys as in the HTTP API; `effect` takes an index or
+  a name), `devmode on=1|0`, `wifi_scan` (→ `wifi_net` events, then `wifi_scan_done`), `wifi_test
+  ssid=&pass=` (≤15 s → `wifi_test` event: ok + rssi, or msg `wrong password` / `network not found` /
+  `timeout` / `connection failed`), `wifi_save ssid=&pass=` (only exactly the last passing test),
+  `wifi_forget`, `wifi_info` (→ `wifi_info` event: configured, ssid, status, ip). Each command also gets
+  `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is the HTTP state plus `"wifi"` (status),
+  `"devmode"`, `"version"`; keep it ≤ 240 bytes (notifications are cut at MTU − 3).
+- Debug: `POST /api/cmd line=<command>` runs a command over HTTP (debug mode); events are logged.
 
 ### Android app (Kotlin + Jetpack Compose, minSdk 31, Android only)
 - **Main:** on/off, effect grid (selected + currently shown), auto-cycle.

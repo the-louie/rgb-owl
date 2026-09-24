@@ -3,6 +3,7 @@
 #include <WebServer.h>
 
 #include "app.h"
+#include "ble.h"
 #include "effect.h"
 #include "leds.h"
 #include "log.h"
@@ -106,6 +107,11 @@ static void addRoutes() {
     }));
     web.on("/api/log", HTTP_GET, devOnly([] { web.send(200, "text/plain", log::dump()); }));
     web.on("/api/test", HTTP_POST, devOnly(postTest));
+    // runs a BLE command line (form field "line"); replies appear as "event:" lines in /api/log
+    web.on("/api/cmd", HTTP_POST, devOnly([] {
+        ble::execute(web.arg("line").c_str());
+        web.send(200, "application/json", "{\"ok\":true}");
+    }));
     // colour tuning: correction=RRGGBB (hex) & gamma=1.0..3.0; not persisted
     web.on("/api/color", HTTP_POST, devOnly([] {
         uint32_t corr = web.hasArg("correction") ? strtoul(web.arg("correction").c_str(), nullptr, 16)
