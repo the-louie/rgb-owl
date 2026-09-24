@@ -113,6 +113,7 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   Time comes from NTP during WiFi windows, and the app pushes phone time + timezone over BLE on every
   connect. The schedule is inactive until the clock has been set once.
 - **New-phone pairing** only during the first 3 minutes after boot; bonded phones connect any time.
+  Unknown phones connecting later are disconnected at once (`PAIRING_WINDOW_MS`, T-32).
 - **Crash info:** last panic/watchdog reason + time kept in NVS, shown in `/api/debug` and the app Developer screen.
 
 ### Boot status display (whole-owl phases)

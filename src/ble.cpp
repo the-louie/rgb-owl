@@ -7,6 +7,8 @@
 #include "effect.h"
 #include "log.h"
 #include "net.h"
+#include "config.h"
+#include "owl/pairing.h"
 #include "owl/protocol.h"
 
 namespace owl::ble {
@@ -44,6 +46,11 @@ static bool isAuthed(uint16_t handle) {
 
 class ServerCallbacks : public NimBLEServerCallbacks {
     void onConnect(NimBLEServer*, ble_gap_conn_desc* desc) override {
+        bool bonded = NimBLEDevice::isBonded(NimBLEAddress(desc->peer_id_addr));
+        if (!pairingAllowed(bonded, millis(), config::PAIRING_WINDOW_MS)) {
+            server->disconnect(desc->conn_handle);  // unknown phone after the pairing window
+            return;
+        }
         portENTER_CRITICAL(&linksMux);
         for (auto& l : links)
             if (!l.used) {
