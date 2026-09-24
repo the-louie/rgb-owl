@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** Sprint 04, in progress (opened 2026-09-24)
+**Active sprint:** Sprint 05, in progress (opened 2026-09-24)
 **Current ticket:** —
 **Last completed:** T-26 (`done` — commit `f748d28`)
 
@@ -74,7 +74,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 | T-17 | Web UI: embedded single page using the API | 3h | T-16 | done | Backlog row 3; Landed in `db3819c` |
 | T-18 | OTA: ArduinoOTA (`owl.local`) + `POST /update` .bin upload | 2h | T-15, T-16 | done | Backlog row 4; Landed in `893b1e6` |
 
-## Sprint 04 — Bluetooth control
+## Sprint 04 — Bluetooth control (done 2026-09-24)
 
 **Goal:** Control the owl from the Android app over bonded BLE, with no WiFi involved.
 **Demo:** gate passes (firmware native tests + app JVM tests + both builds). On hardware: the phone
@@ -92,18 +92,28 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 | T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | done | Landed in `9ddbbcb` |
 | T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | done | Landed in `f748d28` |
 
-## Sprint 05 — WiFi v2, boot status, settings (sketch)
+## Sprint 05 — WiFi v2, boot status, settings
 
-- Firmware: remove WiFiManager/portal; WiFi scan / test (≤15 s, reason codes) / save / forget verbs;
-  boot flow (connect → update check hook → 3 min window → off); debug mode (web UI, debug API,
-  ArduinoOTA) from BLE or `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`.
-- Boot status phases on the LEDs (SPEC v2 §Boot status); boot walk moves to test patterns.
-- App Settings: sliders, WiFi (owl scan list + manual, Test gates Save), GitHub project URL.
-- App Developer: debug toggle, IP, debug fields, test patterns (walk, column, row, pixel).
-- New-phone pairing only in the first 3 min after boot.
-- Auto-cycle effect selection (firmware setting + app toggles).
-- Clock: NTP in WiFi windows + phone time/timezone over BLE; night schedule (off, default 23–07) + app settings.
-- Crash info (last panic/watchdog reason + time) in NVS → `/api/debug` + Developer screen.
+**Goal:** Everything except updates is configured from the app, and WiFi is only up in the boot
+window or debug mode.
+**Demo:** gate passes. On hardware: the boot shows the status phases; WiFi is set up from the app
+(scan → Test → Save); after 3 min WiFi goes off unless debug mode is on; the Settings and Developer
+screens work; the night schedule turns the LEDs off.
+
+| ID | Title | Est | Deps | Status | Notes |
+|---|---|---|---|---|---|
+| T-28 | WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests | 4h | — | todo | SPEC v2 §WiFi |
+| T-29 | BLE WiFi verbs: `wifi_scan`, `wifi_test` (≤15 s, reason), `wifi_save` (only after a passing test), `wifi_forget`; WiFi fields in state | 4h | T-28 | todo | |
+| T-30 | Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted | 3h | T-28 | todo | |
+| T-31 | Boot status LED phases (BLE, WiFi, update placeholder); phase sequencer in lib + tests; boot walk removed (test pattern stays) | 3h | T-28 | todo | SPEC v2 §Boot status |
+| T-32 | New-phone pairing only in the first 3 min after boot | 2h | — | todo | |
+| T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | todo | |
+| T-34 | Clock (`time epoch=&tz=` verb, NTP in WiFi windows) + night schedule (off between hours) in lib + tests | 4h | T-28 | todo | |
+| T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | todo | |
+| T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | todo | |
+| T-37 | App WiFi section: owl scan list + manual SSID, password, Test, Save gated on a pass | 3h | T-29, T-36 | todo | |
+| T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | todo | |
+| T-39 | App pushes phone time + timezone on every connect | 1h | T-34 | todo | |
 
 ## Sprint 06 — updates + release (sketch)
 
@@ -163,3 +173,16 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - **Backlog:** 4 rows closed (settings, WiFi, web UI/API, OTA). 2 rows added (OTA auth
   decision, hardware bring-up). Open: 3, and all of them need the user.
 - **Next:** stop. The remaining work needs the user: flash the hardware, place the strip, decide on auth.
+
+### Sprint 04 (2026-09-24)
+
+- **Demo:** 65 native + 13 JVM tests pass. Firmware (0.0.0-dev) runs on the owl: BLE advertising, PSRAM
+  2 MB, 62 fps, 4 A cap. APK in `dist/owl-app-debug.apk`. **Phone pairing/control is unverified**: this
+  host has no BLE adapter, so the user has to try it.
+- **Worked:** the protocol, semver and hold logic are host-tested. Checking the owl over WiFi after each
+  OTA caught nothing broken.
+- **Didn't:** the BLE end-to-end path can't be tested here. Sprint 05 builds on it before any phone test,
+  which is a risk.
+- **Backlog:** 0 rows closed/added (Sprint 04 came from the SPEC). Open: `gh auth` + repo name, final eye LEDs.
+- **Next:** Sprint 05. Once WiFi goes off by default, the dev loop uses the boot window:
+  OTA → reboot → `POST /api/devmode` within 3 min.
