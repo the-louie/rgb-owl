@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 05, in progress (opened 2026-09-24)
-**Current ticket:** T-33 (`todo` — Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests)
+**Current ticket:** T-33 (`in-progress` — Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests)
 **Last completed:** T-32 (`done` — commit `afff6b1`)
 
 ## Conventions
@@ -107,7 +107,7 @@ screens work; the night schedule turns the LEDs off.
 | T-30 | Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted | 3h | T-28 | done | Landed in `dd83621` |
 | T-31 | Boot status LED phases (BLE, WiFi, update placeholder); phase sequencer in lib + tests; boot walk removed (test pattern stays) | 3h | T-28 | done | SPEC v2 §Boot status; Landed in `c5d50df` |
 | T-32 | New-phone pairing only in the first 3 min after boot | 2h | — | done | Landed in `afff6b1` |
-| T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | todo | |
+| T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | in-progress | |
 | T-34 | Clock (`time epoch=&tz=` verb, NTP in WiFi windows) + night schedule (off between hours) in lib + tests | 4h | T-28 | todo | |
 | T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | todo | |
 | T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | todo | |
