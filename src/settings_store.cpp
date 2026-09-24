@@ -4,15 +4,17 @@
 
 namespace owl::store {
 
-// Bump when Settings changes layout; old blobs are then ignored.
+// Settings is stored as a raw blob. Fields are only ever appended, so an older, shorter
+// blob loads as a prefix and the new fields keep their defaults. Bump VERSION (old
+// blobs are then ignored) only if existing fields change.
 constexpr uint8_t VERSION = 1;
 
 void load(Settings& s) {
     Preferences p;
     if (!p.begin("owl", true)) return;
     Settings tmp;
-    if (p.getUChar("ver", 0) == VERSION && p.getBytesLength("s") == sizeof(tmp) &&
-        p.getBytes("s", &tmp, sizeof(tmp)) == sizeof(tmp))
+    size_t len = p.getBytesLength("s");
+    if (p.getUChar("ver", 0) == VERSION && len > 0 && len <= sizeof(tmp) && p.getBytes("s", &tmp, len) == len)
         s = tmp;
     p.end();
 }

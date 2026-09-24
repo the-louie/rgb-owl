@@ -78,7 +78,9 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   a name), `devmode on=1|0`, `wifi_scan` (→ `wifi_net` events, then `wifi_scan_done`), `wifi_test
   ssid=&pass=` (≤15 s → `wifi_test` event: ok + rssi, or msg `wrong password` / `network not found` /
   `timeout` / `connection failed`), `wifi_save ssid=&pass=` (only exactly the last passing test),
-  `wifi_forget`, `wifi_info` (→ `wifi_info` event: configured, ssid, status, ip). Each command also gets
+  `wifi_forget`, `wifi_info` (→ `wifi_info` event: configured, ssid, status, ip). `config` (→ `config` event with
+  settings that do not fit the state notification: `cycle` bitmask, bit i = effect i in auto-cycle;
+  set it with `set cycle=<mask>`). Each command also gets
   `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is the HTTP state plus `"wifi"` (status),
   `"devmode"`, `"version"`; keep it ≤ 240 bytes (notifications are cut at MTU − 3).
 - Debug: `POST /api/cmd line=<command>` runs a command over HTTP (debug mode); events are logged.

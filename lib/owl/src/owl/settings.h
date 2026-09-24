@@ -17,6 +17,9 @@ struct Settings {
     uint8_t brightness = 128;
     uint8_t speed = 128;         // 128 = 1x
     uint8_t hue = 160;           // breathing colour
+    // Fields below are sent in the `config` event, not the (MTU-limited) state notification.
+    // NVS stores this struct as a blob: only ever APPEND fields (see settings_store.cpp).
+    uint32_t cycle = 0x7FFFFFFF;  // bit i = effect i in auto-cycle
 
     static constexpr uint16_t INTERVAL_MIN_S = 5;
     static constexpr uint16_t INTERVAL_MAX_S = 3600;
@@ -26,7 +29,7 @@ struct Settings {
     bool operator==(const Settings& o) const {
         return on == o.on && effect == o.effect && autoCycle == o.autoCycle &&
                intervalS == o.intervalS && fadeMs == o.fadeMs && brightness == o.brightness &&
-               speed == o.speed && hue == o.hue;
+               speed == o.speed && hue == o.hue && cycle == o.cycle;
     }
     bool operator!=(const Settings& o) const { return !(*this == o); }
 };
@@ -75,6 +78,7 @@ inline ApplyResult apply(Settings& s, const char* key, const char* value, size_t
         {"brightness", Settings::BRIGHTNESS_MIN, 255},
         {"speed", 0, 255},
         {"hue", 0, 255},
+        {"cycle", 0, 0x7FFFFFFF},
     };
     for (const Field& f : fields) {
         if (strcmp(key, f.key)) continue;
@@ -89,6 +93,7 @@ inline ApplyResult apply(Settings& s, const char* key, const char* value, size_t
             case 'b': s.brightness = uint8_t(n); break;
             case 's': s.speed = uint8_t(n); break;
             case 'h': s.hue = uint8_t(n); break;
+            case 'c': s.cycle = uint32_t(n); break;
         }
         return ApplyResult::Ok;
     }

@@ -83,6 +83,14 @@ static void test_to_json_too_small(void) {
     TEST_ASSERT_EQUAL(0, toJson(buf, sizeof(buf), Settings{}, 0));
 }
 
+static void test_cycle_mask(void) {
+    Settings s;
+    TEST_ASSERT_EQUAL_HEX32(0x7FFFFFFF, s.cycle);
+    TEST_ASSERT_EQUAL(ApplyResult::Ok, apply(s, "cycle", "5", 7));
+    TEST_ASSERT_EQUAL(5, s.cycle);
+    TEST_ASSERT_EQUAL(ApplyResult::BadValue, apply(s, "cycle", "x", 7));
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_defaults_match_spec);
@@ -92,5 +100,6 @@ int main() {
     RUN_TEST(test_apply_rejects);
     RUN_TEST(test_to_json);
     RUN_TEST(test_to_json_too_small);
+    RUN_TEST(test_cycle_mask);
     return UNITY_END();
 }

@@ -25,6 +25,8 @@ public:
     void setInterval(uint32_t ms) { interval_ = ms; }
     void setFade(uint32_t ms) { fade_ = ms; }
     void setAuto(bool on) { auto_ = on; }
+    // Bit i set = effect i takes part in auto-cycle (manual select() ignores the mask).
+    void setMask(uint32_t mask) { mask_ = mask; }
     bool autoCycle() const { return auto_; }
     size_t current() const { return current_; }
 
@@ -40,7 +42,11 @@ public:
         started_ = -1;
         if (next_ < 0) {
             elapsed_ += dtMs;
-            if (auto_ && count_ > 1 && elapsed_ >= interval_) begin((current_ + 1) % count_);
+            if (auto_ && count_ > 1 && elapsed_ >= interval_) {
+                int n = nextEnabled();
+                if (n >= 0) begin(size_t(n));
+                else elapsed_ = 0;  // nothing else enabled: stay, check again next interval
+            }
         } else {
             fadeT_ += dtMs;
         }
@@ -50,6 +56,14 @@ public:
     }
 
 private:
+    int nextEnabled() const {
+        for (size_t k = 1; k < count_; ++k) {
+            size_t i = (current_ + k) % count_;
+            if (i < 32 && (mask_ >> i) & 1) return int(i);
+        }
+        return -1;
+    }
+
     void begin(size_t i) {
         next_ = int(i);
         fadeT_ = 0;
@@ -65,6 +79,7 @@ private:
     uint32_t interval_;
     uint32_t fade_;
     bool auto_ = true;
+    uint32_t mask_ = 0xFFFFFFFFu;
     size_t current_ = 0;
     int next_ = -1;
     uint32_t elapsed_ = 0;

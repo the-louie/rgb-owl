@@ -44,6 +44,7 @@ static uint32_t testStartMs = 0;
 static void applyAll() {
     FastLED.setBrightness(cfg.brightness);
     cycler.setAuto(cfg.autoCycle);
+    cycler.setMask(cfg.cycle);
     cycler.setInterval(cfg.intervalS * 1000UL);
     cycler.setFade(cfg.fadeMs);
     effects::setBreathingHue(cfg.hue);

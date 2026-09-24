@@ -146,6 +146,13 @@ static void handle(const char* line) {
         pushState(false);
         return sendResult(verb, nullptr);
     }
+    if (!strcmp(verb, "config")) {  // settings that do not fit the state notification
+        char buf[200];
+        JsonWriter w(buf, sizeof(buf));
+        w.str("type", "config").num("cycle", long(app::settings().cycle));
+        if (const char* j = w.finish()) sendEvent(j);
+        return sendResult(verb, nullptr);
+    }
     if (!strcmp(verb, "wifi_scan")) {
         if (!net::startScan()) return sendResult(verb, "wifi busy");
         return sendResult(verb, nullptr);  // networks follow as wifi_net events
