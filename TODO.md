@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 06, in progress (opened 2026-09-24)
-**Current ticket:** T-42 (`todo` — Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing)
+**Current ticket:** T-42 (`in-progress` — Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing)
 **Last completed:** T-41 (`done` — commit `314efe3`)
 
 ## Conventions
@@ -127,7 +127,7 @@ events; an unsigned or tampered one is refused; a crash-looping image rolls back
 |---|---|---|---|---|---|
 | T-40 | Rollback: mark the new image valid only after BLE is up + 60 s (`verifyRollbackLater`); log/report rollbacks | 2h | — | done | core has APP_ROLLBACK_ENABLE; Landed in `fa0c913` |
 | T-41 | Firmware signing: ECDSA P-256 over SHA-256, `tools/sign-firmware.py`, key in gitignored `keys/`, public key in `include/`; owl verifies with mbedTLS | 4h | — | done | Landed in `314efe3` |
-| T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | todo | |
+| T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | in-progress | |
 | T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | todo | ArduinoJson filter |
 | T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | todo | |
 | T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | todo | |
