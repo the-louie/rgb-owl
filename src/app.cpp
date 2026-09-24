@@ -117,7 +117,7 @@ void begin() {
     cycler.update(cfg.fadeMs);  // start on the saved effect without a fade
     random16_set_seed(uint16_t(esp_random()));
     bootMs = lastMs = millis();
-    log::printf("owl: boot, reset reason %s, built %s %s", resetReason(), __DATE__, __TIME__);
+    log::printf("owl: boot, version %s, reset reason %s", OWL_VERSION, resetReason());
     log::printf("owl: %u LEDs, grid %ux%u, %u effects", leds::LAYOUT.numLeds,
                   leds::LAYOUT.width, leds::LAYOUT.height, unsigned(EFFECTS.size()));
 }
@@ -189,13 +189,13 @@ void appendDebug(String& j) {
         leds::strip, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
     char buf[512];
     snprintf(buf, sizeof(buf),
-             "\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
+             "\"version\":\"%s\",\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
              "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
              "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
              "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_walk\":%s,"
              "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
              "\"power_limit_ma\":%lu",
-             __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
+             OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
              unsigned(ESP.getFreeHeap()), unsigned(ESP.getMinFreeHeap()),
              unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
              (unsigned long)stats.fps(), (unsigned long)stats.maxFrameUs(), L.numLeds, L.width,

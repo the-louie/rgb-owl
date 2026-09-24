@@ -151,7 +151,7 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
     or 400 `{"error"}`
   - `GET /api/effects` → effect names in cycle order
 - Debug API (open, like the web UI):
-  - `GET /api/debug`: build, uptime, reset reason, heap, fps, show() time, estimated LED mA vs limit,
+  - `GET /api/debug`: version, build, uptime, reset reason, heap, fps, show() time, estimated LED mA vs limit,
     brightness after power limit, effect, test mode, WiFi state/SSID/RSSI/IP
   - `GET /api/frame`: last rendered frame, strip order, `rrggbb` per LED (before brightness/power scaling)
   - `GET /api/log`: last 4 KB of the firmware log (same lines as USB serial)

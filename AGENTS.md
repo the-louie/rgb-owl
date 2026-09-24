@@ -93,7 +93,8 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
 Once the v2 WiFi model lands (Sprint 05), it is only reachable during the 3-minute boot window or in
 debug mode: `curl -d password=… http://10.13.110.163/api/devmode` right after a power cycle.
-- Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until `uptime_s` resets.
+- Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until
+  `version` shows the new `git describe` string (from `tools/version.py`).
 - Inspect: `curl http://10.13.110.163/api/debug`, `/api/log`, and `/api/frame` (what the effect
   actually rendered; use it before guessing at a visual bug report).
 - Test patterns: `curl -d "mode=column&index=0" http://10.13.110.163/api/test` (put back with `mode=none`).
