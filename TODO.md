@@ -7,7 +7,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 **Active sprint:** Sprint 06, in progress (opened 2026-09-24)
 **Current ticket:** T-49 (`todo` — Scrub the OTA password from history, create the public repo, push, set CI secrets, first release)
-**Last completed:** T-48 (`done` — commit `b532067`)
+**Last completed:** T-48 (`done` — commit `421f618`)
 
 ## Conventions
 
@@ -82,15 +82,15 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | done | SPEC v2 §Release; Landed in `5a0f77d` |
-| T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | done | Landed in `637f569` |
-| T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | done | SPEC v2 §BLE; Landed in `faf35bf` |
-| T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | done | check NimBLE version vs core 2.0.17; Landed in `699ad3c` |
-| T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | done | Landed in `177e2a4` |
-| T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | done | SPEC v2 §Improvements; Landed in `3b6db73` |
-| T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | done | memory-limited Gradle settings; Landed in `c25c839` |
-| T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | done | Landed in `9ddbbcb` |
-| T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | done | Landed in `f748d28` |
+| T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | done | SPEC v2 §Release; Landed in `9a25531` |
+| T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | done | Landed in `0edac72` |
+| T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | done | SPEC v2 §BLE; Landed in `5fee15d` |
+| T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | done | check NimBLE version vs core 2.0.17; Landed in `084ef95` |
+| T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | done | Landed in `2899aa3` |
+| T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | done | SPEC v2 §Improvements; Landed in `387f737` |
+| T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | done | memory-limited Gradle settings; Landed in `9aa903f` |
+| T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | done | Landed in `9eef116` |
+| T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | done | Landed in `ed0953f` |
 
 ## Sprint 05 — WiFi v2, boot status, settings (done 2026-09-24)
 
@@ -102,18 +102,18 @@ screens work; the night schedule turns the LEDs off.
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-28 | WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests | 4h | — | done | SPEC v2 §WiFi; Landed in `a17eb98` |
-| T-29 | BLE WiFi verbs: `wifi_scan`, `wifi_test` (≤15 s, reason), `wifi_save` (only after a passing test), `wifi_forget`; WiFi fields in state | 4h | T-28 | done | Landed in `ea83ff2` |
-| T-30 | Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted | 3h | T-28 | done | Landed in `dd83621` |
-| T-31 | Boot status LED phases (BLE, WiFi, update placeholder); phase sequencer in lib + tests; boot walk removed (test pattern stays) | 3h | T-28 | done | SPEC v2 §Boot status; Landed in `c5d50df` |
-| T-32 | New-phone pairing only in the first 3 min after boot | 2h | — | done | Landed in `afff6b1` |
-| T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | done | Landed in `628a76b` |
-| T-34 | Clock (`time epoch=&tz=` verb, NTP in WiFi windows) + night schedule (off between hours) in lib + tests | 4h | T-28 | done | Landed in `0f27f7a` |
-| T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | done | Landed in `a9043bc` |
-| T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | done | Landed in `e740312` |
-| T-37 | App WiFi section: owl scan list + manual SSID, password, Test, Save gated on a pass | 3h | T-29, T-36 | done | Landed in `5bf9b12` |
-| T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | done | Landed in `5b83b97` |
-| T-39 | App pushes phone time + timezone on every connect | 1h | T-34 | done | Landed in `70eb251` |
+| T-28 | WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests | 4h | — | done | SPEC v2 §WiFi; Landed in `b15da8d` |
+| T-29 | BLE WiFi verbs: `wifi_scan`, `wifi_test` (≤15 s, reason), `wifi_save` (only after a passing test), `wifi_forget`; WiFi fields in state | 4h | T-28 | done | Landed in `e921275` |
+| T-30 | Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted | 3h | T-28 | done | Landed in `648bc09` |
+| T-31 | Boot status LED phases (BLE, WiFi, update placeholder); phase sequencer in lib + tests; boot walk removed (test pattern stays) | 3h | T-28 | done | SPEC v2 §Boot status; Landed in `958d158` |
+| T-32 | New-phone pairing only in the first 3 min after boot | 2h | — | done | Landed in `1ad8ec6` |
+| T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | done | Landed in `a8b8611` |
+| T-34 | Clock (`time epoch=&tz=` verb, NTP in WiFi windows) + night schedule (off between hours) in lib + tests | 4h | T-28 | done | Landed in `9297b34` |
+| T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | done | Landed in `6305a17` |
+| T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | done | Landed in `a2c3a54` |
+| T-37 | App WiFi section: owl scan list + manual SSID, password, Test, Save gated on a pass | 3h | T-29, T-36 | done | Landed in `f718927` |
+| T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | done | Landed in `fc05965` |
+| T-39 | App pushes phone time + timezone on every connect | 1h | T-34 | done | Landed in `9e960f2` |
 
 ## Sprint 06 — updates + release
 
@@ -125,16 +125,16 @@ events; an unsigned or tampered one is refused; a crash-looping image rolls back
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-40 | Rollback: mark the new image valid only after BLE is up + 60 s (`verifyRollbackLater`); log/report rollbacks | 2h | — | done | core has APP_ROLLBACK_ENABLE; Landed in `fa0c913` |
-| T-41 | Firmware signing: ECDSA P-256 over SHA-256, `tools/sign-firmware.py`, key in gitignored `keys/`, public key in `include/`; owl verifies with mbedTLS | 4h | — | done | Landed in `314efe3` |
-| T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | done | Landed in `d6e1e86` |
-| T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | done | ArduinoJson filter; Landed in `ba9cdee` |
-| T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | done | Landed in `092549f` |
-| T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | done | Landed in `315ba5e` |
-| T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | done | CI secret later; Landed in `2e0aaba` |
-| T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | done | Landed in `1160c5d` |
-| T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | done | runs once the repo exists; Landed in `b532067` |
-| T-49 | Scrub the OTA password from history, create the public repo, push, set CI secrets, first release | 2h | T-48 | todo | **needs the user:** `gh auth login` + repo name |
+| T-40 | Rollback: mark the new image valid only after BLE is up + 60 s (`verifyRollbackLater`); log/report rollbacks | 2h | — | done | core has APP_ROLLBACK_ENABLE; Landed in `0646178` |
+| T-41 | Firmware signing: ECDSA P-256 over SHA-256, `tools/sign-firmware.py`, key in gitignored `keys/`, public key in `include/`; owl verifies with mbedTLS | 4h | — | done | Landed in `5051e18` |
+| T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | done | Landed in `a9f3c8f` |
+| T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | done | ArduinoJson filter; Landed in `7caabd5` |
+| T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | done | Landed in `f6b1493` |
+| T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | done | Landed in `53bce67` |
+| T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | done | CI secret later; Landed in `06353f1` |
+| T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | done | Landed in `a9b0075` |
+| T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | done | runs once the repo exists; Landed in `421f618` |
+| T-49 | Scrub the OTA password from history, create the public repo, push, set CI secrets, first release | 2h | T-48 | todo | Local part done 2026-09-24: remote `origin`, `./publish.sh`, history scrubbed (101 commits rewritten, `Landed in` hashes remapped). **User:** create the repo, set CI secrets if using `--ci`, then `./publish.sh 1.0.0` |
 
 ## Backlog
 
@@ -146,7 +146,6 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - ~~**OTA: ArduinoOTA + `.bin` upload endpoint**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-18):** `src/ota.cpp` (`ArduinoOTA.begin`, `/update` handler), `[env:s3zero-ota]` in `platformio.ini`. Original row kept for the record: OTA: ArduinoOTA + `.bin` upload endpoint (SPEC §Connectivity)
 - ~~**OTA / web UI authentication**~~ — **CLOSED, verified 2026-09-23 (user decision):** OTA password in `platformio.ini` `[owl] ota_password`, enforced in `src/ota.cpp` (`ArduinoOTA.setPassword`, `/update` → 401); web UI stays open. Original row kept for the record: OTA / web UI authentication (needs user decision)
 - ~~**Real layout values in `layout.h`**~~ — **CLOSED, verified 2026-09-23:** 62 LEDs / 6x12 in `include/layout.h`, pinned by `test_config_matches_measured_owl`; flashed, `/api/debug` reports `"leds":62,"grid":"6x12"`. Original row kept for the record: Real layout values in `layout.h` (blocked: user must place the strip first)
-- **`gh auth login` + repo name** (needs the user; blocks Sprint 06 release tooling)
 - **Final eye LEDs** (provisional 6+13 right, 35+51 left; user confirms once the owl is mounted)
 - **Hardware bring-up + effect tuning** (needs flashed hardware: 3.3 V data reliability, WiFi/RMT flicker, effect speeds and colours, power cap)
 

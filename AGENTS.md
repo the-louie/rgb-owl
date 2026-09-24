@@ -260,4 +260,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-24 | EVENT    | Firmware signing key generated: keys/owl-signing.pem (gitignored, local only) - user must back it up; public key committed in include/signing_key.h
 2026-09-24 | OPEN     | Back up keys/owl-signing.pem offline (losing it = owls can only be updated over USB/debug mode)
 2026-09-24 | EVENT    | APK release keystore generated: keys/owl-app.jks + keys/owl-app.properties (gitignored, local only) - user must back them up with keys/owl-signing.pem
+2026-09-24 | EVENT    | History scrubbed: OTA password replaced by REDACTED in platformio.ini of 101 rewritten commits (git filter-branch); refs/original removed, reflog expired, gc; TODO hashes remapped
+2026-09-24 | DECISION | Remote origin = git@github.com:the-louie/rgb-owl.git; user pushes and publishes (./publish.sh)
 ```
