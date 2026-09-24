@@ -14,6 +14,8 @@ void loop();  // reports installer progress as events, restarts after a successf
 // Installs an image from explicit URLs (debug hook; GitHub lookup comes in T-43).
 bool installFrom(const String& imageUrl, const String& sigUrl);
 void setEventSink(void (*sink)(const char* json));
+// Starts a release lookup; reports {"type":"update_info",...}. False if busy/no project/offline.
+bool check();
 bool installing();
 uint8_t installPercent();
 

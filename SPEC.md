@@ -146,6 +146,10 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   streams it into the other OTA slot while hashing, verifies the signature, then `Update.end()` and a
   restart. Events: `{"type":"update","state":"downloading","pct"}` every 5 %, `verifying`, `installed`,
   `failed` + msg. The LEDs show a cyan fill while downloading. Debug-mode hook: `update_url url=&sig=`.
+- Release lookup (T-43): `GET api.github.com/repos/<project>/releases?per_page=10` (anonymous, HTTP/1.0,
+  ArduinoJson filter); the highest semver tag wins; drafts never; pre-releases only in debug mode.
+  Assets `owl-firmware.bin` + `owl-firmware.bin.sig`. BLE `update_check` → `update_info` event
+  (current, latest, newer, msg).
 - Rollback detection: the slot to boot is written to NVS before restarting; booting any other slot
   sets `rolled_back`. It stays recorded until the new image is marked valid.
 - **Signed firmware** (T-41): ECDSA P-256 over SHA-256, DER `owl-firmware.bin.sig` next to the image,

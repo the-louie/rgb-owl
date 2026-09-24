@@ -3,6 +3,8 @@
 #include <Preferences.h>
 
 #include "installer.h"
+#include "net.h"
+#include "releases.h"
 #include "log.h"
 #include "rollback.h"
 #include "owl/protocol.h"
@@ -42,6 +44,23 @@ bool installing() {
 }
 uint8_t installPercent() { return installer::percent(); }
 
+bool check() {
+    if (repo.isEmpty() || !net::online()) return false;
+    return releases::start(repo, net::devmode());
+}
+
+static void reportCheck() {
+    const releases::Result& r = releases::result();
+    char buf[240];
+    JsonWriter w(buf, sizeof(buf));
+    w.str("type", "update_info").str("current", OWL_VERSION).str("latest", r.tag.c_str()).boolean("newer", r.newer);
+    if (!r.error.isEmpty()) w.str("msg", r.error.c_str());
+    const char* j = w.finish();
+    if (sink && j) sink(j);
+    log::printf("update: latest %s (%s)%s%s", r.tag.length() ? r.tag.c_str() : "none", r.newer ? "newer" : "not newer",
+                r.error.length() ? ", " : "", r.error.c_str());
+}
+
 bool installFrom(const String& imageUrl, const String& sigUrl) {
     if (!installer::start(imageUrl, sigUrl)) return false;
     log::printf("update: installing %s", imageUrl.c_str());
@@ -50,6 +69,11 @@ bool installFrom(const String& imageUrl, const String& sigUrl) {
 }
 
 void loop() {
+    auto rs = releases::state();
+    if (rs == releases::State::Done || rs == releases::State::Failed) {
+        reportCheck();
+        releases::reset();
+    }
     using S = installer::State;
     S s = installer::state();
     uint8_t p = installer::percent();
