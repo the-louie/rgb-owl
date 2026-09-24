@@ -142,7 +142,7 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
 - Before the repo goes public, the OTA password is scrubbed from git history (user decision:
   rewrite history, keep the password).
 
-## Connectivity — v1 (current firmware; replaced by v2)
+## Connectivity — v1 (history: the portal and always-on WiFi were removed in T-28; the HTTP API is debug-mode only since T-30)
 
 - Joins home WiFi; hostname/mDNS `owl.local`.
 - No stored credentials / no connection within 15 s → open AP `Owl-Setup` with captive portal

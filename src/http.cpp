@@ -13,6 +13,7 @@ namespace owl::http {
 extern const char INDEX_HTML[] asm("_binary_web_index_html_start");
 
 static WebServer web(80);
+
 static bool running = false;
 static bool routed = false;
 
@@ -75,13 +76,24 @@ static void postTest() {
     getDebug();
 }
 
+// POST /api/devmode: password=<OTA password>&on=1|0 (reachable in the boot window).
+static void postDevmode() {
+    if (web.arg("password") != OWL_OTA_PASSWORD) {
+        log::printf("http: devmode rejected, wrong password");
+        return web.send(401, "application/json", "{\"error\":\"wrong password\"}");
+    }
+    net::setDevmode(web.arg("on") != "0");
+    getDebug();
+}
+
 static void addRoutes() {
-    web.on("/", HTTP_GET, [] { web.send(200, "text/html", INDEX_HTML); });
-    web.on("/api/state", HTTP_GET, [] { sendState(); });
-    web.on("/api/state", HTTP_POST, postState);
-    web.on("/api/effects", HTTP_GET, getEffects);
-    web.on("/api/debug", HTTP_GET, getDebug);
-    web.on("/api/frame", HTTP_GET, [] {
+    web.on("/", HTTP_GET, devOnly([] { web.send(200, "text/html", INDEX_HTML); }));
+    web.on("/api/state", HTTP_GET, devOnly([] { sendState(); }));
+    web.on("/api/state", HTTP_POST, devOnly(postState));
+    web.on("/api/effects", HTTP_GET, devOnly(getEffects));
+    web.on("/api/debug", HTTP_GET, getDebug);  // also in the boot window
+    web.on("/api/devmode", HTTP_POST, postDevmode);  // also in the boot window
+    web.on("/api/frame", HTTP_GET, devOnly([] {
         // last rendered frame, strip order, before brightness/power scaling
         String out;
         out.reserve(leds::LAYOUT.numLeds * 7);
@@ -91,11 +103,11 @@ static void addRoutes() {
             out += px;
         }
         web.send(200, "text/plain", out);
-    });
-    web.on("/api/log", HTTP_GET, [] { web.send(200, "text/plain", log::dump()); });
-    web.on("/api/test", HTTP_POST, postTest);
+    }));
+    web.on("/api/log", HTTP_GET, devOnly([] { web.send(200, "text/plain", log::dump()); }));
+    web.on("/api/test", HTTP_POST, devOnly(postTest));
     // colour tuning: correction=RRGGBB (hex) & gamma=1.0..3.0; not persisted
-    web.on("/api/color", HTTP_POST, [] {
+    web.on("/api/color", HTTP_POST, devOnly([] {
         uint32_t corr = web.hasArg("correction") ? strtoul(web.arg("correction").c_str(), nullptr, 16)
                                                  : leds::correction();
         float g = web.hasArg("gamma") ? web.arg("gamma").toFloat() : leds::gamma();
@@ -103,13 +115,13 @@ static void addRoutes() {
         leds::setColor(corr, g);
         log::printf("color: correction %06lx gamma %.2f", (unsigned long)corr, double(g));
         getDebug();
-    });
-    web.on("/api/reboot", HTTP_POST, [] {
+    }));
+    web.on("/api/reboot", HTTP_POST, devOnly([] {
         log::printf("reboot requested over HTTP");
         web.send(200, "application/json", "{\"ok\":true}");
         delay(300);
         ESP.restart();
-    });
+    }));
     web.onNotFound([] { web.send(404, "text/plain", "not found"); });
 }
 
@@ -128,5 +140,12 @@ void loop() {
 }
 
 WebServer& server() { return web; }
+
+std::function<void()> devOnly(std::function<void()> handler) {
+    return [handler] {
+        if (net::devmode()) return handler();
+        web.send(403, "application/json", "{\"error\":\"debug mode is off\"}");
+    };
+}
 
 }  // namespace owl::http

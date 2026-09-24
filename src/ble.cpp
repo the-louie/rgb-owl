@@ -5,6 +5,7 @@
 #include "app.h"
 #include "effect.h"
 #include "log.h"
+#include "net.h"
 #include "owl/protocol.h"
 
 namespace owl::ble {
@@ -129,6 +130,13 @@ static void handle(const char* line) {
             if (r == ApplyResult::BadValue) return sendResult(verb, "bad value");
         }
         pushState(false);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "devmode")) {
+        const char* on = cmd.get("on");
+        if (!on) return sendResult(verb, "missing on");
+        net::setDevmode(strcmp(on, "0") != 0);
+        pushState(true);
         return sendResult(verb, nullptr);
     }
     sendResult(verb, "unknown verb");

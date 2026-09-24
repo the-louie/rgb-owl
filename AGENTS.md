@@ -94,8 +94,10 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 ## Talking to the device
 
 The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
-Once the v2 WiFi model lands (Sprint 05), it is only reachable during the 3-minute boot window or in
-debug mode: `curl -d password=… http://10.13.110.163/api/devmode` right after a power cycle.
+Since T-28/T-30 the owl is only reachable in the 3-minute boot window or in debug mode.
+**`tools/owl-dev.sh 10.13.110.163 flash`** OTA-flashes it (debug mode must be on) and turns debug mode
+back on inside the new boot window. If debug mode is off and the window has closed, only the user can
+help: a power cycle (then `tools/owl-dev.sh <ip> devmode` within 3 min) or the app's debug toggle.
 - Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until
   `version` shows the new `git describe` string (from `tools/version.py`).
 - Inspect: `curl http://10.13.110.163/api/debug`, `/api/log`, and `/api/frame` (what the effect

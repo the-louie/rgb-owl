@@ -60,7 +60,7 @@ static void uploadChunk() {
 }
 
 void begin() {
-    http::server().on("/update", HTTP_POST, uploadDone, uploadChunk);
+    http::server().on("/update", HTTP_POST, http::devOnly(uploadDone), http::devOnly(uploadChunk));
     ArduinoOTA.setHostname(config::HOSTNAME);
     ArduinoOTA.setPassword(OWL_OTA_PASSWORD);
     ArduinoOTA.setMdnsEnabled(false);  // net.cpp owns mDNS
@@ -72,10 +72,14 @@ void begin() {
 }
 
 void loop() {
-    if (!started && net::online()) {
+    bool want = net::online() && net::devmode();  // ArduinoOTA only in debug mode
+    if (want && !started) {
         ArduinoOTA.begin();
         MDNS.enableArduino(3232);
         started = true;
+    } else if (!want && started) {
+        ArduinoOTA.end();
+        started = false;
     }
     if (started) ArduinoOTA.handle();
 }
