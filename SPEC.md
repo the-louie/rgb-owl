@@ -172,7 +172,7 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
 - **Signed firmware:** release images carry a signature from a private key; the owl rejects
   unsigned/invalid images for GitHub updates. Debug-mode uploads (ArduinoOTA, web `.bin`) may be
   unsigned (password-protected).
-- **Rollback:** a new image must reach "BLE advertising + 60 s up" to be marked valid; otherwise the
+- **Rollback:** a new image must reach "BLE up (advertising or a phone connected) + 60 s" to be marked valid; otherwise the
   bootloader reverts to the previous image. `/api/debug` shows `ota_state` (pending/valid) and `rolled_back`. Test image:
   build with `PLATFORMIO_BUILD_FLAGS=-DOWL_CRASH_TEST` (panics 10 s after boot).
 - Recovery: hold BOOT for 5 s → forget bonded phones and WiFi credentials, three red flashes, restart

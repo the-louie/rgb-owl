@@ -19,7 +19,9 @@ constexpr const char* EFFECTS_UUID = "4f574c00-8a1b-4c2e-9d3f-2b1a6c7e0005";  //
 
 void begin();
 int bondCount();
-bool advertising();  // GATT server started and advertising
+// GATT server running: advertising, or serving a connected phone (NimBLE stops advertising
+// while a phone is connected, so 'advertising' alone kept new images unconfirmed, v1.0.1).
+bool up();
 void loop();  // runs queued commands and pushes state changes (main loop only)
 // Runs one command line as if written to the command characteristic (debug: POST /api/cmd).
 // Events are also logged while debug mode is on.

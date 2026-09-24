@@ -39,7 +39,7 @@ void begin() {
 }
 
 void loop() {
-    if (!pending || !shouldMarkValid(ble::advertising(), millis(), config::ROLLBACK_GRACE_MS)) return;
+    if (!pending || !shouldMarkValid(ble::up(), millis(), config::ROLLBACK_GRACE_MS)) return;
     if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
         pending = false;
         Preferences p;

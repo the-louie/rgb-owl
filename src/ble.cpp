@@ -303,7 +303,9 @@ void execute(const char* line) { handle(line); }
 
 int bondCount() { return NimBLEDevice::getNumBonds(); }
 
-bool advertising() { return server && NimBLEDevice::getAdvertising()->isAdvertising(); }
+bool up() {
+    return server && (NimBLEDevice::getAdvertising()->isAdvertising() || server->getConnectedCount() > 0);
+}
 
 void loop() {
     char line[Command::MAX_LEN + 1];
