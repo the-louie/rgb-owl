@@ -1,0 +1,82 @@
+package se.louie.owl
+
+import android.app.Application
+import android.bluetooth.le.ScanResult
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import se.louie.owl.ble.OwlBleClient
+import se.louie.owl.protocol.Protocol
+
+data class FoundOwl(val address: String, val name: String?, val rssi: Int)
+
+class OwlViewModel(app: Application) : AndroidViewModel(app) {
+    val client = OwlBleClient(app, viewModelScope)
+
+    private val _found = MutableStateFlow<List<FoundOwl>>(emptyList())
+    val found: StateFlow<List<FoundOwl>> = _found.asStateFlow()
+    private val _scanning = MutableStateFlow(false)
+    val scanning: StateFlow<Boolean> = _scanning.asStateFlow()
+    private val _error = MutableStateFlow<String?>(null)
+    val error: StateFlow<String?> = _error.asStateFlow()
+    private var scanJob: Job? = null
+
+    init {
+        viewModelScope.launch {
+            client.events.collect { e -> if (e.type == "error") _error.value = "${e.verb}: ${e.msg}" }
+        }
+    }
+
+    /** Called once permissions are granted: reconnect to the remembered owl, if any. */
+    fun start() {
+        client.rememberedAddress?.let { if (client.connection.value is se.louie.owl.ble.Connection.Idle) client.connect(it) }
+    }
+
+    fun scan() {
+        scanJob?.cancel()
+        _found.value = emptyList()
+        _scanning.value = true
+        scanJob = viewModelScope.launch {
+            try {
+                kotlinx.coroutines.withTimeoutOrNull(15_000) {
+                    client.scan().collect { r: ScanResult ->
+                        val owl = FoundOwl(r.device.address, r.scanRecord?.deviceName, r.rssi)
+                        _found.value = (_found.value.filter { it.address != owl.address } + owl).sortedByDescending { it.rssi }
+                    }
+                }
+            } catch (e: Exception) {
+                _error.value = e.message
+            } finally {
+                _scanning.value = false
+            }
+        }
+    }
+
+    fun connect(address: String) {
+        scanJob?.cancel()
+        client.connect(address)
+    }
+
+    fun forget() = client.disconnect(forget = true)
+
+    /** Sends `set k=v&…`; errors come back as events. */
+    fun set(vararg args: Pair<String, Any>) = send(Protocol.command("set", *args))
+
+    fun send(line: String) {
+        viewModelScope.launch {
+            try {
+                client.send(line)
+            } catch (e: Exception) {
+                _error.value = e.message
+            }
+        }
+    }
+
+    fun clearError() {
+        _error.value = null
+    }
+}
