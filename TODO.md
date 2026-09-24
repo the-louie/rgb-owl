@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 04, in progress (opened 2026-09-24)
-**Current ticket:** T-24 (`todo` — Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs)
+**Current ticket:** T-24 (`in-progress` — Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs)
 **Last completed:** T-23 (`done` — commit `177e2a4`)
 
 ## Conventions
@@ -88,7 +88,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 | T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | done | check NimBLE version vs core 2.0.17; Landed in `699ad3c` |
 | T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | done | Landed in `177e2a4` |
 | T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | done | SPEC v2 §Improvements; Landed in `3b6db73` |
-| T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | todo | memory-limited Gradle settings |
+| T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | in-progress | memory-limited Gradle settings |
 | T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | todo | |
 | T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | todo | |
 
