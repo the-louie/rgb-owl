@@ -141,6 +141,9 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   (`OWL_VERSION` from `git describe`).
 - A newer release installs automatically (at boot and in the daily check), or on demand from the app.
 - **Pre-releases** are ignored by the owl unless it is in debug mode (test channel).
+- **Signed firmware** (T-41): ECDSA P-256 over SHA-256, DER `owl-firmware.bin.sig` next to the image,
+  made by `tools/sign-firmware.py` (key: gitignored `keys/owl-signing.pem` or `$OWL_SIGNING_KEY`);
+  public key in `include/signing_key.h`; debug-mode `POST /api/verify data=<hex>&sig=<hex>` self-test.
 - **Signed firmware:** release images carry a signature from a private key; the owl rejects
   unsigned/invalid images for GitHub updates. Debug-mode uploads (ArduinoOTA, web `.bin`) may be
   unsigned (password-protected).

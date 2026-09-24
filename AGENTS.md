@@ -239,4 +239,6 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-24 | DECISION | APK keystore + firmware signing key live as CI secrets; user keeps offline backups
 2026-09-24 | DECISION | New-phone pairing only in first 3 min after boot
 2026-09-24 | EVENT    | Disk: __docs + dist moved to /mnt/backup/owl (symlinked), scratch experiments (474 MB) offloaded; root 20 GB free
+2026-09-24 | EVENT    | Firmware signing key generated: keys/owl-signing.pem (gitignored, local only) - user must back it up; public key committed in include/signing_key.h
+2026-09-24 | OPEN     | Back up keys/owl-signing.pem offline (losing it = owls can only be updated over USB/debug mode)
 ```

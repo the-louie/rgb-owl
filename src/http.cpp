@@ -2,12 +2,15 @@
 
 #include <WebServer.h>
 
+#include <vector>
+
 #include "app.h"
 #include "ble.h"
 #include "effect.h"
 #include "leds.h"
 #include "log.h"
 #include "net.h"
+#include "signature.h"
 
 namespace owl::http {
 
@@ -107,6 +110,18 @@ static void addRoutes() {
     }));
     web.on("/api/log", HTTP_GET, devOnly([] { web.send(200, "text/plain", log::dump()); }));
     web.on("/api/test", HTTP_POST, devOnly(postTest));
+    // signature self-test: data=<hex>&sig=<hex DER> -> {"valid":bool}
+    web.on("/api/verify", HTTP_POST, devOnly([] {
+        auto unhex = [](const String& h, std::vector<uint8_t>& out) {
+            for (size_t i = 0; i + 1 < h.length(); i += 2) out.push_back(uint8_t(strtoul(h.substring(i, i + 2).c_str(), nullptr, 16)));
+        };
+        std::vector<uint8_t> data, sig;
+        unhex(web.arg("data"), data);
+        unhex(web.arg("sig"), sig);
+        signature::Verifier v;
+        v.update(data.data(), data.size());
+        web.send(200, "application/json", v.finish(sig.data(), sig.size()) ? "{\"valid\":true}" : "{\"valid\":false}");
+    }));
     // runs a BLE command line (form field "line"); replies appear as "event:" lines in /api/log
     web.on("/api/cmd", HTTP_POST, devOnly([] {
         ble::execute(web.arg("line").c_str());
