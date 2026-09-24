@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** — (Sprints 04–06 planned 2026-09-24; waiting for the user's go)
+**Active sprint:** Sprint 04, in progress (opened 2026-09-24)
 **Current ticket:** —
 **Last completed:** T-18 (`done` — commit `893b1e6`)
 
@@ -13,7 +13,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 - Tickets are 1–4 h. Status values: `todo` / `in-progress` / `done`.
 - Commits per ticket: `T-XX: start`, `T-XX: <title>`, `T-XX: close`. No attribution trailer.
-- DoD: `pio test -e native` passes, `pio run -e s3zero` builds, and docs are updated
+- DoD: `pio test -e native` passes, `pio run -e s3zero` builds, the app's JVM tests pass and
+  `assembleDebug` succeeds (once `android/` exists), and docs are updated
   (or marked N/A). Hardware behaviour counts as **unverified** until the user flashes it.
 
 ## Roadmap
@@ -73,7 +74,7 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 | T-17 | Web UI: embedded single page using the API | 3h | T-16 | done | Backlog row 3; Landed in `db3819c` |
 | T-18 | OTA: ArduinoOTA (`owl.local`) + `POST /update` .bin upload | 2h | T-15, T-16 | done | Backlog row 4; Landed in `893b1e6` |
 
-## Sprint 04 — Bluetooth control (planned)
+## Sprint 04 — Bluetooth control
 
 **Goal:** Control the owl from the Android app over bonded BLE, with no WiFi involved.
 **Demo:** gate passes (firmware native tests + app JVM tests + both builds). On hardware: the phone
