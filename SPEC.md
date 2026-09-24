@@ -61,7 +61,82 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 - Power limit: FastLED `setMaxPowerInVoltsAndMilliamps(5, 8000)` (configurable; 10 A PSU).
 - Settings persisted to NVS (Preferences), written ~5 s after last change.
 
-## Connectivity
+## Connectivity — v2: Android app over Bluetooth (planned 2026-09-24, Sprints 04–06)
+
+Supersedes the v1 connectivity below once Sprint 05 lands.
+
+### Bluetooth LE (primary control)
+- NimBLE GATT server, advertised as `Owl`, custom 128-bit service.
+- Security: bonding with a static 6-digit passkey (MITM, LE Secure Connections). Every
+  characteristic needs an encrypted, authenticated link. The PIN is in gitignored `secrets.ini`.
+- Characteristics: `state` (read/notify, JSON: settings + shown effect + firmware version + update/WiFi
+  status), `command` (write, `verb key=value&key=value`, URL-encoded), `event` (notify, JSON replies:
+  WiFi scan list, test result, update progress, errors), `effects` (read, JSON names).
+
+### Android app (Kotlin + Jetpack Compose, minSdk 31, Android only)
+- **Main:** on/off, effect grid (selected + currently shown), auto-cycle.
+- **Settings:** brightness, speed, interval, fade, breathing colour. WiFi: the owl scans and the app
+  lists the networks (manual SSID entry too) → password → **Test** (the owl tries to join, ≤15 s, and
+  reports OK + RSSI or the reason) → **Save** is enabled only after a passing test. GitHub project URL
+  (the owl uses it to find the latest release). Firmware version, **Check**, **Install**, progress.
+- **Developer** (hidden): debug-mode toggle, IP, `/api/debug` fields, test patterns.
+- Remembers the bonded owl and reconnects on launch. Self-update: offers a newer `owl-app.apk`
+  from the same GitHub release.
+
+### WiFi (updates + debugging only)
+- There is no captive portal. Credentials are provisioned only from the app (stored in NVS).
+- **Every boot:** join WiFi → check the GitHub latest release → install it if newer → keep WiFi up
+  for a **3-minute window**, then turn WiFi off unless debug mode is on. Also re-checks every 24 h of
+  uptime (WiFi on only for that).
+- During the window, HTTP only serves `GET /api/debug` and `POST /api/devmode`
+  (`password` = OTA password → 401 otherwise).
+- **Debug mode** (from the app or `/api/devmode`) keeps WiFi on with the full web UI, the debug API
+  (`/api/log`, `/api/frame`, `/api/test`, …) and ArduinoOTA. It is not persisted: it lasts until
+  switched off or the next reboot.
+
+### Improvements (interview 2026-09-24)
+- **Colour correction:** FastLED strip correction + gamma, tuned in debug mode on the real owl.
+- **Power cap:** 4000 mA (62 LEDs × 60 mA = 3.7 A), replacing 8000 mA.
+- **Auto-cycle selection:** each effect can be enabled/disabled in the app; auto-cycle skips disabled
+  ones (persisted; all enabled by default).
+- **Night schedule:** LEDs **off** between set hours (default 23:00–07:00, editable in app Settings).
+  Time comes from NTP during WiFi windows, and the app pushes phone time + timezone over BLE on every
+  connect. The schedule is inactive until the clock has been set once.
+- **New-phone pairing** only during the first 3 minutes after boot; bonded phones connect any time.
+- **Crash info:** last panic/watchdog reason + time kept in NVS, shown in `/api/debug` and the app Developer screen.
+
+### Boot status display (whole-owl phases)
+Replaces the boot column walk (the walk moves to the Developer screen / `/api/test mode=walk`).
+1. **BLE:** green flash = phone(s) bonded; blue flash = no phone bonded.
+2. **WiFi:** steady red = not configured (skip step 3); yellow pulse = connecting; green flash =
+   connected; **rapid red/black blinking** = failed to connect.
+3. **Update:** purple pulse = checking; green flash = up to date; cyan fill bottom → top =
+   downloading (shows % until reboot); red flash = check failed.
+Then effects start, 3 s after the update check finishes (typically 5–15 s after power-on).
+
+### Firmware updates
+- Source: latest release of the configured GitHub project (public repo; the owl downloads anonymously
+  over HTTPS with the certificate bundle). Asset `owl-firmware.bin`. Tag `vX.Y.Z` = firmware version
+  (`OWL_VERSION` from `git describe`).
+- A newer release installs automatically (at boot and in the daily check), or on demand from the app.
+- **Pre-releases** are ignored by the owl unless it is in debug mode (test channel).
+- **Signed firmware:** release images carry a signature from a private key; the owl rejects
+  unsigned/invalid images for GitHub updates. Debug-mode uploads (ArduinoOTA, web `.bin`) may be
+  unsigned (password-protected).
+- **Rollback:** a new image must reach "BLE advertising + 60 s up" to be marked valid; otherwise the
+  bootloader reverts to the previous image.
+- Recovery: hold BOOT for 5 s → forget bonded phones and WiFi credentials.
+
+### Release
+- **GitHub Actions CI:** tests + builds on every push; a pushed tag builds, signs and publishes the
+  release. CI secrets: OTA password, BLE PIN, firmware signing key, APK keystore (+ passwords). The user
+  keeps an offline backup of both keys (a lost APK key means reinstalling the app once).
+- A GitHub release per version carries `owl-firmware.bin`, `owl-s3zero-merged.bin` (for the web
+  flasher) and `owl-app.apk`.
+- Before the repo goes public, the OTA password is scrubbed from git history (user decision:
+  rewrite history, keep the password).
+
+## Connectivity — v1 (current firmware; replaced by v2)
 
 - Joins home WiFi; hostname/mDNS `owl.local`.
 - No stored credentials / no connection within 15 s → open AP `Owl-Setup` with captive portal

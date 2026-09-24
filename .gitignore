@@ -2,3 +2,4 @@ __docs/
 .pio/
 .vscode/
 *.bin
+secrets.ini

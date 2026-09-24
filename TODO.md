@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** — (Sprint 03 done 2026-09-23; remaining rows need the user)
+**Active sprint:** — (Sprints 04–06 planned 2026-09-24; waiting for the user's go)
 **Current ticket:** —
 **Last completed:** T-18 (`done` — commit `893b1e6`)
 
@@ -23,6 +23,9 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 | 01 | Skeleton: project builds for the S3; the layout maps to the strip; one effect renders |
 | 02 | All 7 effects, plus auto-cycle with crossfade |
 | 03 | WiFi (captive portal, mDNS), NVS settings, web UI, OTA |
+| 04 | Bluetooth control: secrets, GATT server, bonding; Android app skeleton + Main screen |
+| 05 | v2 WiFi model (app-provisioned, boot window, debug mode), boot status display, app Settings + Developer |
+| 06 | GitHub-release updates (auto + app), rollback, app self-update, public repo + release tooling |
 
 ## Sprint 01 — skeleton (done 2026-09-23)
 
@@ -70,6 +73,48 @@ survive a power cycle; `pio run -t upload --upload-port owl.local` works.
 | T-17 | Web UI: embedded single page using the API | 3h | T-16 | done | Backlog row 3; Landed in `db3819c` |
 | T-18 | OTA: ArduinoOTA (`owl.local`) + `POST /update` .bin upload | 2h | T-15, T-16 | done | Backlog row 4; Landed in `893b1e6` |
 
+## Sprint 04 — Bluetooth control (planned)
+
+**Goal:** Control the owl from the Android app over bonded BLE, with no WiFi involved.
+**Demo:** gate passes (firmware native tests + app JVM tests + both builds). On hardware: the phone
+pairs with the PIN, sees the owl's state, and switches effect/on-off; after an app restart it reconnects.
+
+| ID | Title | Est | Deps | Status | Notes |
+|---|---|---|---|---|---|
+| T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | todo | SPEC v2 §Release |
+| T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | todo | |
+| T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | todo | SPEC v2 §BLE |
+| T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | todo | check NimBLE version vs core 2.0.17 |
+| T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | todo | |
+| T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | todo | SPEC v2 §Improvements |
+| T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | todo | memory-limited Gradle settings |
+| T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | todo | |
+| T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | todo | |
+
+## Sprint 05 — WiFi v2, boot status, settings (sketch)
+
+- Firmware: remove WiFiManager/portal; WiFi scan / test (≤15 s, reason codes) / save / forget verbs;
+  boot flow (connect → update check hook → 3 min window → off); debug mode (web UI, debug API,
+  ArduinoOTA) from BLE or `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`.
+- Boot status phases on the LEDs (SPEC v2 §Boot status); boot walk moves to test patterns.
+- App Settings: sliders, WiFi (owl scan list + manual, Test gates Save), GitHub project URL.
+- App Developer: debug toggle, IP, debug fields, test patterns (walk, column, row, pixel).
+- New-phone pairing only in the first 3 min after boot.
+- Auto-cycle effect selection (firmware setting + app toggles).
+- Clock: NTP in WiFi windows + phone time/timezone over BLE; night schedule (off, default 23–07) + app settings.
+- Crash info (last panic/watchdog reason + time) in NVS → `/api/debug` + Developer screen.
+
+## Sprint 06 — updates + release (sketch)
+
+- Firmware: GitHub latest-release lookup (HTTPS, cert bundle), semver compare, download
+  `owl-firmware.bin` with progress events, auto-install at boot + every 24 h, rollback (valid after BLE up 60 s).
+- App: firmware section (version, check, install, progress), self-update from `owl-app.apk`.
+- Pre-release channel: ignored unless in debug mode.
+- Signed firmware: signing key, signature appended in the release build, verified by the owl for GitHub updates.
+- GitHub Actions: test + build on push; on a tag, sign firmware + APK (keystore as a CI secret) and publish the release.
+- Release: scrub the OTA password from git history, create the public GitHub repo (user confirms
+  name, after `gh auth login`), `tools/release.sh` tag → build → `gh release` with 3 assets.
+
 ## Backlog
 
 Unscheduled, in rough priority order. Sprint 03 draws from here.
@@ -80,6 +125,7 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - ~~**OTA: ArduinoOTA + `.bin` upload endpoint**~~ — **CLOSED, verified 2026-09-23 (Sprint 03 T-18):** `src/ota.cpp` (`ArduinoOTA.begin`, `/update` handler), `[env:s3zero-ota]` in `platformio.ini`. Original row kept for the record: OTA: ArduinoOTA + `.bin` upload endpoint (SPEC §Connectivity)
 - ~~**OTA / web UI authentication**~~ — **CLOSED, verified 2026-09-23 (user decision):** OTA password in `platformio.ini` `[owl] ota_password`, enforced in `src/ota.cpp` (`ArduinoOTA.setPassword`, `/update` → 401); web UI stays open. Original row kept for the record: OTA / web UI authentication (needs user decision)
 - ~~**Real layout values in `layout.h`**~~ — **CLOSED, verified 2026-09-23:** 62 LEDs / 6x12 in `include/layout.h`, pinned by `test_config_matches_measured_owl`; flashed, `/api/debug` reports `"leds":62,"grid":"6x12"`. Original row kept for the record: Real layout values in `layout.h` (blocked: user must place the strip first)
+- **`gh auth login` + repo name** (needs the user; blocks Sprint 06 release tooling)
 - **Final eye LEDs** (provisional 6+13 right, 35+51 left; user confirms once the owl is mounted)
 - **Hardware bring-up + effect tuning** (needs flashed hardware: 3.3 V data reliability, WiFi/RMT flicker, effect speeds and colours, power cap)
 

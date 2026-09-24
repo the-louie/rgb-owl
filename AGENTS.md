@@ -39,6 +39,9 @@ in `SPEC.md`, and it is the source of truth for behaviour.
 | LED power | Separate 5 V 10 A PSU; firmware current cap 8000 mA | Interview |
 | Layout | Compile-time `include/layout.h` | Interview |
 | Stack | PlatformIO + Arduino + FastLED | Interview; build verified |
+| App | Android only, Kotlin + Jetpack Compose, minSdk 31, in `android/` | Interview 2026-09-24 |
+| Control | BLE (bonded, static PIN); WiFi only for updates, 3-min boot window, debug mode | Interview 2026-09-24 |
+| Secrets | OTA password + BLE PIN in gitignored `secrets.ini`, never in git (repo goes public) | Interview 2026-09-24 |
 
 ### Pin rules (from the ESP32-S3 datasheet and the Zero schematic)
 - **Never use** GPIO0, 3, 45, 46 (strapping), GPIO19/20 (native USB D-/D+),
@@ -73,9 +76,23 @@ passed to `render()` (never into `leds::strip` directly, because crossfade rende
 effects), use `Frame::t` / `Frame::dt` (speed-scaled ms) instead of `millis()`, and add the
 instance (one file per effect in `src/effects/`, accessor in `src/effects/effects.h`) to `ALL[]` in `src/effects.cpp` (array order = auto-cycle order).
 
+## Android build
+
+- JDK 17: `~/.local/jdk/current`. Android SDK: `~/.local/android-sdk` (platform 35, build-tools 35/34).
+  Gradle 8.11.1: `~/.local/gradle-8.11.1` (projects use the wrapper). Installed 2026-09-24.
+- `export JAVA_HOME=~/.local/jdk/current ANDROID_HOME=~/.local/android-sdk`, then in `android/`:
+  `./gradlew --no-daemon testDebugUnitTest assembleDebug`.
+- **Memory:** the host has ~1.5 GB free. With default settings the Gradle daemon is OOM-killed. Keep
+  `org.gradle.jvmargs=-Xmx1024m`, `org.gradle.workers.max=1` and
+  `kotlin.compiler.execution.strategy=in-process` in `gradle.properties`.
+- Smoke build verified (AGP 8.7.3, Kotlin 2.0.21, Compose BOM 2024.12.01): 8.7 MB debug APK, JUnit OK.
+- Disk: about 6.9 GB free after the install (`~/.gradle` 1.1 GB).
+
 ## Talking to the device
 
 The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
+Once the v2 WiFi model lands (Sprint 05), it is only reachable during the 3-minute boot window or in
+debug mode: `curl -d password=… http://10.13.110.163/api/devmode` right after a power cycle.
 - Flash: `pio run -e s3zero-ota -t upload --upload-port 10.13.110.163`, then poll `/api/debug` until `uptime_s` resets.
 - Inspect: `curl http://10.13.110.163/api/debug`, `/api/log`, and `/api/frame` (what the effect
   actually rendered; use it before guessing at a visual bug report).
@@ -190,4 +207,20 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-23 | DECISION | Debug API added (/api/debug, /api/log, /api/test, /api/reboot), open like the web UI; device at 10.13.110.163, agent may OTA it
 2026-09-23 | DECISION | Layout = measured owl, 62 LEDs, COLUMNS {10,2},{11,1},{11,1},{12,0},{11,1},{7,0}; user-verified via ASCII diagram
 2026-09-23 | OPEN     | Eye LEDs provisional (6,13 right; 35,51 left) until owl is mounted
+2026-09-24 | EVENT    | Installed JDK 17 (Temurin), Android cmdline-tools + SDK 35 + build-tools 35/34, Gradle 8.11.1 under ~/.local; SDK licences accepted via sdkmanager --licenses; smoke APK OK with 1 GB heap
+2026-09-24 | DECISION | Android app: Kotlin + Compose, minSdk 31, Android only; Main/Settings/Developer screens; auto-reconnect; self-update from GitHub release
+2026-09-24 | DECISION | BLE control with bonding + static passkey (PIN generated, stored in gitignored secrets.ini)
+2026-09-24 | DECISION | WiFi: no captive portal; creds via app with owl-side scan + mandatory passing Test before Save
+2026-09-24 | DECISION | Every boot: WiFi on, check GitHub latest release, auto-install if newer, WiFi up 3 min then off; also every 24 h uptime
+2026-09-24 | DECISION | Boot window HTTP = /api/debug + /api/devmode (OTA password); debug mode = web UI + debug API + ArduinoOTA, not persisted
+2026-09-24 | DECISION | Firmware source = GitHub latest release of project URL set in app (public repo, anonymous HTTPS); auto-install; rollback if new image not valid after BLE up 60 s
+2026-09-24 | DECISION | Recovery: BOOT held 5 s clears bonds + WiFi creds
+2026-09-24 | DECISION | Repo goes public: scrub OTA password from git history before first push (keep password); secrets move to gitignored secrets.ini
+2026-09-24 | OPEN     | User must run 'gh auth login' and confirm repo name before the first push/release
+2026-09-24 | DECISION | Boot status = whole-owl phases (BLE, WiFi, update); WiFi failed = rapid red/black blink; shown until update check done +3 s; boot walk moves to test patterns
+2026-09-24 | EVENT    | Sprints 04-06 planned in TODO.md; waiting for user go / further instructions
+2026-09-24 | DECISION | Improvements: colour correction; power cap 4000 mA; per-effect auto-cycle toggle; night schedule = LEDs off (default 23-07), time via NTP + phone push over BLE
+2026-09-24 | DECISION | Safety: pre-release channel (ignored unless debug mode); signed firmware for GitHub updates (debug uploads may be unsigned); GitHub Actions CI builds+signs+publishes on tag; crash info in NVS
+2026-09-24 | DECISION | APK keystore + firmware signing key live as CI secrets; user keeps offline backups
+2026-09-24 | DECISION | New-phone pairing only in first 3 min after boot
 ```
