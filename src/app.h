@@ -17,6 +17,7 @@ const Settings& settings();
 ApplyResult set(const char* key, const char* value);
 // Effect currently shown (differs from settings().effect while auto-cycling).
 size_t currentEffect();
+int nextEffect();  // effect currently being crossfaded to, or -1
 
 // Debug test patterns (override effects until mode "none"):
 //   none | off | solid (r,g,b) | pixel (index = strip index) |

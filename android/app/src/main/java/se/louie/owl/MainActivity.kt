@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.SystemBarStyle
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.activity.result.contract.ActivityResultContracts
@@ -18,7 +19,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,13 +41,18 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()  // targetSdk 35 draws edge-to-edge anyway; screens pad for the system bars
+        // targetSdk 35 draws edge-to-edge anyway; screens pad for the system bars. Light bars:
+        // dark status-bar icons on the white Bodforss background.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+        )
         super.onCreate(savedInstanceState)
         granted.value = permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
         if (granted.value) vm.start() else request.launch(permissions)
 
         setContent {
-            MaterialTheme(colorScheme = darkColorScheme()) {
+            se.louie.owl.ui.OwlTheme {
                 Surface(Modifier.fillMaxSize()) {
                     val connection by vm.client.connection.collectAsState()
                     when {
@@ -77,7 +82,7 @@ private fun OwlTabs(vm: OwlViewModel) {
                     NavigationBarItem(
                         selected = tab == i,
                         onClick = { tab = i },
-                        icon = { Text(listOf("🦉", "⚙", "🛠")[i]) },
+                        icon = { if (i == 0) se.louie.owl.ui.OwlMark(24.dp) else Text(listOf("", "⚙", "🛠")[i]) },
                         label = { Text(label) },
                     )
                 }

@@ -14,6 +14,7 @@ data class OwlState(
     val on: Boolean = true,
     val effect: Int = 0,
     val current: Int = 0,
+    val next: Int = -1, // crossfade target, -1 when not fading
     @SerialName("auto") val autoCycle: Boolean = true,
     val interval: Int = 60,
     val fade: Int = 2000,

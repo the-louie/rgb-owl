@@ -124,6 +124,8 @@ static String stateJson() {
     if (!n) return "{}";
     String s(buf);
     s.remove(s.length() - 1);  // reopen the object to append more fields
+    s += ",\"next\":";  // crossfade target (-1 = none), so the app can fade its highlight too
+    s += app::nextEffect();
     s += ",\"wifi\":\"";
     s += net::statusName();
     s += "\",\"devmode\":";

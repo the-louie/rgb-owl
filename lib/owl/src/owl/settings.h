@@ -16,7 +16,7 @@ struct Settings {
     uint16_t fadeMs = 2000;      // crossfade duration
     uint8_t brightness = 128;
     uint8_t speed = 128;         // 128 = 1x
-    uint8_t hue = 160;           // breathing colour
+    uint8_t hue = 160;           // breathing colour; 160 = blue (Bodforss #040D81)
     // Fields below are sent in the `config` event, not the (MTU-limited) state notification.
     // NVS stores this struct as a blob: only ever APPEND fields (see settings_store.cpp).
     uint32_t cycle = 0x7FFFFFFF;  // bit i = effect i in auto-cycle

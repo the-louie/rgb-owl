@@ -1,5 +1,7 @@
 package se.louie.owl.ui
 
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.mutableIntStateOf
@@ -43,7 +45,9 @@ fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            Text("🦉 Owl", style = MaterialTheme.typography.headlineMedium, modifier = Modifier.weight(1f))
+            OwlMark(36.dp, modifier = Modifier.padding(end = 10.dp))
+            Text("Owl", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.weight(1f))
             Text(if (s.on) "On" else "Off", modifier = Modifier.padding(end = 8.dp))
             Switch(checked = s.on, onCheckedChange = { vm.set("on" to if (it) 1 else 0) })
         }
@@ -58,11 +62,17 @@ fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
             modifier = Modifier.weight(1f),
         ) {
             itemsIndexed(effects) { i, name ->
-                val shown = i == s.current
+                // Follow the owl's crossfade: the effect it fades to fades in over the same time,
+                // the previous one fades out (s.next is the fade target, -1 when not fading).
+                val shown = i == (if (s.next >= 0) s.next else s.current)
+                val bg by animateColorAsState(
+                    if (shown) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
+                    animationSpec = tween(durationMillis = s.fade.coerceIn(0, 10_000)),
+                    label = "effect $i",
+                )
                 Card(
                     onClick = { vm.set("effect" to i) },
-                    colors = if (shown) CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
-                    else CardDefaults.cardColors(),
+                    colors = CardDefaults.cardColors(containerColor = bg),
                     border = if (i == s.effect) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                 ) {
                     Text(

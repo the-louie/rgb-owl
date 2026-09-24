@@ -202,6 +202,7 @@ ApplyResult set(const char* key, const char* value) {
 }
 
 size_t currentEffect() { return cycler.current(); }
+int nextEffect() { return cycler.next(); }
 
 bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index) {
     const auto& L = leds::LAYOUT;

@@ -49,7 +49,7 @@ facing forward through the white parts.
 4. Aurora / northern lights (pastel)
 5. Owl eyes (glow + occasional blink; eye LEDs from `EYES[]`)
 6. Rainbow sweep + twinkle
-7. Breathing solid pastel colour
+7. Breathing solid colour (full saturation; default hue 160 = Bodforss blue #040D81)
 
 Palette bias: pastel (desaturated) colours where the effect allows.
 
@@ -85,7 +85,8 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
 - Night settings: `set night=1|0&night_from=1380&night_to=420`. The default zone is Europe/Stockholm
   (`CET-1CEST,M3.5.0,M10.5.0/3`) until the phone sends its own; NTP (pool.ntp.org) syncs while WiFi is up. Each command also gets
   `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is the HTTP state plus `"wifi"` (status),
-  `"devmode"`, `"version"`; keep it ≤ 240 bytes (notifications are cut at MTU − 3).
+  `"devmode"`, `"version"`, `"next"` (crossfade target, −1 = none: the app fades its highlight with the
+  owl); keep it ≤ 240 bytes (notifications are cut at MTU − 3).
 - `test mode=…[&r&g&b&index]` → test pattern, same as `POST /api/test` (Developer screen).
 - `project [url=…]` → `project` event (`owner/repo`; accepts a GitHub URL, `github.com/o/r` or `o/r`;
   an empty url clears it). Stored in NVS `update`.
@@ -94,6 +95,8 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
 - Debug: `POST /api/cmd line=<command>` runs a command over HTTP (debug mode); events are logged.
 
 ### Android app (Kotlin + Jetpack Compose, minSdk 31, Android only)
+- Look: Bodforss colours (#040D81 blue, #28A745 green, black, white and tints), light theme; launcher and
+  in-app icon = white Bodforss owl (`Bodforss_Ikon_Owl_White.png`) on / tinted Bodforss blue.
 - **Main:** on/off, effect grid (selected + currently shown), auto-cycle.
 - **Settings:** brightness, speed, interval, fade, breathing colour. WiFi: the owl scans and the app
   lists the networks (manual SSID entry too) → password → **Test** (the owl tries to join, ≤15 s, and

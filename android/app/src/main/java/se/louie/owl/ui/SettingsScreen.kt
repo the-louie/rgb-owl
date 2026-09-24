@@ -154,8 +154,8 @@ private fun SettingSlider(label: String, value: Int, range: IntRange, format: (I
 
 @Composable
 private fun HueBar() {
-    // FastLED hues 0..255 span the rainbow; pastel preview (low saturation) like the owl
-    val colors = (0..6).map { Color.hsv(it * 60f % 360f, 0.45f, 1f) }
+    // FastLED hues 0..255 span the rainbow (160 = blue); breathing uses full saturation
+    val colors = (0..6).map { Color.hsv(it * 60f % 360f, 0.9f, 0.9f) }
     Box(
         Modifier.fillMaxWidth().height(10.dp).clip(RoundedCornerShape(5.dp)).background(Brush.horizontalGradient(colors)),
     )

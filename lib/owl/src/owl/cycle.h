@@ -29,6 +29,7 @@ public:
     void setMask(uint32_t mask) { mask_ = mask; }
     bool autoCycle() const { return auto_; }
     size_t current() const { return current_; }
+    int next() const { return next_; }  // effect being faded to, or -1
 
     // Crossfade to effect i (finishing any fade in progress first).
     void select(size_t i) {
@@ -39,7 +40,8 @@ public:
     }
 
     State update(uint32_t dtMs) {
-        started_ = -1;
+        // started_ may already be set by select() since the last update: report it, don't drop it
+        // (dropping it left manually selected effects without start(), e.g. rain stuck on row 0)
         if (next_ < 0) {
             elapsed_ += dtMs;
             if (auto_ && count_ > 1 && elapsed_ >= interval_) {
@@ -52,7 +54,9 @@ public:
         }
         if (next_ >= 0 && fadeT_ >= fade_) finish();
         uint8_t mix = next_ < 0 ? 0 : uint8_t(fadeT_ * 255 / fade_);
-        return State{current_, next_, mix, started_};
+        State s{current_, next_, mix, started_};
+        started_ = -1;
+        return s;
     }
 
 private:

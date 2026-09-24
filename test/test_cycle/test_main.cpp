@@ -115,6 +115,23 @@ static void test_mask_does_not_block_manual_select(void) {
     TEST_ASSERT_EQUAL(0, c.update(100).current);  // auto moves on to the enabled one
 }
 
+static void test_select_reports_started(void) {
+    Cycler c(4, 60000, 100);
+    c.update(16);
+    c.select(2);
+    Cycler::State s = c.update(16);
+    TEST_ASSERT_EQUAL(2, s.started);  // the caller must call start() on a manual pick
+    TEST_ASSERT_EQUAL(-1, c.update(16).started);
+}
+
+static void test_select_with_hard_cut_reports_started(void) {
+    Cycler c(4, 60000, 0);
+    c.select(3);
+    Cycler::State s = c.update(16);
+    TEST_ASSERT_EQUAL(3, s.current);
+    TEST_ASSERT_EQUAL(3, s.started);
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_holds_until_interval);
@@ -129,5 +146,7 @@ int main() {
     RUN_TEST(test_mask_skips_disabled);
     RUN_TEST(test_mask_with_only_current_enabled_stays);
     RUN_TEST(test_mask_does_not_block_manual_select);
+    RUN_TEST(test_select_reports_started);
+    RUN_TEST(test_select_with_hard_cut_reports_started);
     return UNITY_END();
 }
