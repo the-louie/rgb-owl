@@ -94,6 +94,14 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 - Smoke build verified (AGP 8.7.3, Kotlin 2.0.21, Compose BOM 2024.12.01): 8.7 MB debug APK, JUnit OK.
 - Disk: about 6.9 GB free after the install (`~/.gradle` 1.1 GB).
 
+## Releases
+
+`tools/release.sh` builds `dist/release/` (owl-firmware.bin + .sig, owl-s3zero-merged.bin, owl-app.apk,
+VERSION). CI (`.github/workflows/ci.yml`) runs the tests and builds on every push. A pushed tag `vX.Y.Z`
+(or `vX.Y.Z-rc.N` for a pre-release) runs `tools/release.sh` with repo secrets and publishes the release.
+The tag must equal HEAD's `tools/version.py`. Secrets: OWL_OTA_PASSWORD, OWL_BLE_PIN, OWL_SIGNING_KEY,
+OWL_KEYSTORE_B64, OWL_KEYSTORE_PASSWORD.
+
 ## Talking to the device
 
 The owl is reachable from the dev host at **10.13.110.163** (`owl.local` may not resolve here).
@@ -139,7 +147,8 @@ modules change settings only through `app::set(key, value)`.
 Installed toolchain (user-level, verified 2026-09-23):
 - PlatformIO Core 6.1.19, platform `espressif32` 6.11.0, Arduino core 2.0.17
   (ESP-IDF 4.4), `toolchain-xtensa-esp32s3`, esptool 4.5.1
-- arduino-cli 1.5.1 with `esp32:esp32` 3.3.11 (alternative; not the primary build)
+- arduino-cli 1.5.1 is still on PATH, but `~/.arduino15` (its esp32 core) is gone as of 2026-09-24.
+  Use PlatformIO's esptool: `pio pkg exec --package tool-esptoolpy -- esptool.py …`
 - FastLED pinned to **3.9.20**: 3.10.x silently falls back to a bit-banged generic driver on
   Arduino core 2.0.17 / IDF 4.4 (serial warning `Using GENERIC fallback clockless controller`),
   which made every LED white on hardware. Check the serial log/`/api/log` after any FastLED bump.

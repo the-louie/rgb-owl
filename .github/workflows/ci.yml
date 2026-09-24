@@ -1,0 +1,81 @@
+# Tests + builds on every push; a pushed tag vX.Y.Z[-pre] builds, signs and publishes the release.
+# Repository secrets: OWL_OTA_PASSWORD, OWL_BLE_PIN, OWL_SIGNING_KEY (PEM),
+#                     OWL_KEYSTORE_B64 (base64 of keys/owl-app.jks), OWL_KEYSTORE_PASSWORD
+name: ci
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+permissions:
+  contents: write  # gh release create
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # git describe needs history + tags (tools/version.py)
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.platformio
+            ~/.gradle/caches
+          key: ${{ runner.os }}-${{ hashFiles('platformio.ini', 'android/**/*.kts') }}
+
+      - name: Install PlatformIO
+        run: pip install platformio
+
+      - name: Secrets (placeholders unless this is a release)
+        env:
+          OTA: ${{ secrets.OWL_OTA_PASSWORD }}
+          PIN: ${{ secrets.OWL_BLE_PIN }}
+        run: |
+          if [ "${GITHUB_REF_TYPE}" = tag ]; then
+            printf '[owl_secrets]\nota_password = %s\nble_pin = %s\n' "$OTA" "$PIN" > secrets.ini
+          else
+            cp secrets.ini.example secrets.ini
+          fi
+
+      - name: Firmware tests + build
+        run: |
+          pio test -e native
+          pio run -e s3zero
+
+      - name: App tests + debug build
+        if: github.ref_type != 'tag'
+        run: tools/build-app.sh debug
+
+      - name: Release artifacts
+        if: github.ref_type == 'tag'
+        env:
+          OWL_SIGNING_KEY: ${{ secrets.OWL_SIGNING_KEY }}
+          OWL_KEYSTORE_PASSWORD: ${{ secrets.OWL_KEYSTORE_PASSWORD }}
+          KEYSTORE_B64: ${{ secrets.OWL_KEYSTORE_B64 }}
+        run: |
+          echo "$KEYSTORE_B64" | base64 -d > "$RUNNER_TEMP/owl-app.jks"
+          export OWL_KEYSTORE_FILE="$RUNNER_TEMP/owl-app.jks"
+          tools/release.sh
+          test "$(cat dist/release/VERSION)" = "${GITHUB_REF_NAME#v}"  # tag must be HEAD's version
+
+      - name: Publish release
+        if: github.ref_type == 'tag'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pre=""
+          case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
+          gh release create "$GITHUB_REF_NAME" $pre --generate-notes \
+            dist/release/owl-firmware.bin dist/release/owl-firmware.bin.sig \
+            dist/release/owl-s3zero-merged.bin dist/release/owl-app.apk
