@@ -283,7 +283,8 @@ void begin() {
         names += '"';
     }
     names += ']';
-    svc->createCharacteristic(EFFECTS_UUID, R)->setValue(names.c_str());
+    // explicit bytes + length: NimBLE 1.4's setValue(const T&) would copy sizeof(const char*) = the pointer
+    svc->createCharacteristic(EFFECTS_UUID, R)->setValue(reinterpret_cast<const uint8_t*>(names.c_str()), names.length());
     svc->start();
     pushState(true);
     net::setEventSink(sendEvent);

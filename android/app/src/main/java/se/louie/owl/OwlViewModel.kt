@@ -218,6 +218,8 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
                         _found.value = (_found.value.filter { it.address != owl.address } + owl).sortedByDescending { it.rssi }
                     }
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e  // scan stopped (e.g. an owl was picked): not an error
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
@@ -240,6 +242,8 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             try {
                 client.send(line)
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 _error.value = e.message
             }

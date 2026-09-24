@@ -184,6 +184,7 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
         op { g.requestMtu(247) }
         op { g.discoverServices() }
         val svc = g.getService(OwlUuids.SERVICE) ?: error("not an owl (service missing)")
+        for (c in svc.characteristics) Log.d(TAG, "char ${c.uuid} handle ${c.instanceId} props ${c.properties}")
         // First encrypted read: Android shows the system PIN dialog if this phone is not bonded yet,
         // so allow time for typing the PIN.
         val effects = read(g, svc.getCharacteristic(OwlUuids.EFFECTS), timeoutMs = 90_000)
@@ -193,8 +194,11 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
         _state.value = Protocol.parseState(read(g, svc.getCharacteristic(OwlUuids.STATE)))
     }
 
-    private suspend fun read(g: BluetoothGatt, chr: BluetoothGattCharacteristic, timeoutMs: Long = 10_000): String =
-        (op(timeoutMs) { g.readCharacteristic(chr) } as ByteArray).toString(Charsets.UTF_8)
+    private suspend fun read(g: BluetoothGatt, chr: BluetoothGattCharacteristic, timeoutMs: Long = 10_000): String {
+        val v = op(timeoutMs) { g.readCharacteristic(chr) } as ByteArray
+        Log.d(TAG, "read ${chr.uuid} (handle ${chr.instanceId}): ${v.size} B ${v.joinToString("") { "%02x".format(it) }.take(64)}")
+        return v.toString(Charsets.UTF_8)
+    }
 
     private suspend fun enableNotify(g: BluetoothGatt, chr: BluetoothGattCharacteristic) {
         g.setCharacteristicNotification(chr, true)
@@ -269,6 +273,7 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
         }
 
         override fun onCharacteristicRead(g: BluetoothGatt, chr: BluetoothGattCharacteristic, value: ByteArray, status: Int) {
+            Log.d(TAG, "onCharacteristicRead ${chr.uuid} status=$status ${value.size} B")
             if (status == BluetoothGatt.GATT_SUCCESS) complete(value) else failPending("read failed: $status")
         }
 
