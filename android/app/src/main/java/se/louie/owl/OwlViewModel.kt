@@ -20,7 +20,8 @@ import se.louie.owl.protocol.Protocol
 
 data class WifiInfo(val configured: Boolean, val ssid: String, val status: String, val ip: String)
 
-data class FoundOwl(val address: String, val name: String?, val rssi: Int)
+/** pairingOpen: the owl's advertised pairing-window flag (null = older firmware without it). */
+data class FoundOwl(val address: String, val name: String?, val rssi: Int, val pairingOpen: Boolean?, val bonded: Boolean)
 
 class OwlViewModel(app: Application) : AndroidViewModel(app) {
     val client = OwlBleClient(app, viewModelScope)
@@ -208,7 +209,12 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
             try {
                 kotlinx.coroutines.withTimeoutOrNull(15_000) {
                     client.scan().collect { r: ScanResult ->
-                        val owl = FoundOwl(r.device.address, r.scanRecord?.deviceName, r.rssi)
+                        val flag = r.scanRecord?.getManufacturerSpecificData(0xFFFF)?.firstOrNull()
+                        val owl = FoundOwl(
+                            r.device.address, r.scanRecord?.deviceName, r.rssi,
+                            pairingOpen = flag?.let { it.toInt() == 1 },
+                            bonded = r.device.bondState == android.bluetooth.BluetoothDevice.BOND_BONDED,
+                        )
                         _found.value = (_found.value.filter { it.address != owl.address } + owl).sortedByDescending { it.rssi }
                     }
                 }

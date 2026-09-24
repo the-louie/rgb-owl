@@ -71,6 +71,14 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
     private var wanted: String? = null // address we should stay connected to
     private var reconnectJob: Job? = null
     private val backoff = Backoff()
+    private var ready = false   // current link finished setUp()
+    private var refusals = 0    // unpaired links dropped before setup
+
+    companion object {
+        /** Shown when the owl drops an unpaired phone: its pairing window (3 min after power-on) is closed. */
+        const val REFUSED = "The owl refused to pair. New phones can only pair during the first 3 minutes " +
+            "after the owl is powered on: unplug it for 2 s, plug it back in, then connect again."
+    }
 
     /** Address of the owl this phone is bonded with, if any. */
     val rememberedAddress: String? get() = prefs.getString("address", null)
@@ -97,6 +105,7 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
 
     /** Connects and keeps reconnecting until [disconnect]. The address is remembered. */
     fun connect(address: String) {
+        refusals = 0
         wanted = address
         prefs.edit().putString("address", address).apply()
         backoff.reset()
@@ -222,6 +231,8 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
                 scope.launch {
                     try {
                         setUp(g)
+                        ready = true
+                        refusals = 0
                         backoff.reset()
                         _connection.value = Connection.Ready(g.device.address, g.device.name)
                     } catch (e: Exception) {
@@ -234,6 +245,16 @@ class OwlBleClient(private val context: Context, private val scope: CoroutineSco
                 failPending("disconnected (status $status)")
                 g.close()
                 if (gatt == g) gatt = null
+                val wasReady = ready
+                ready = false
+                // An unpaired phone that is dropped before setup = the owl's pairing window is closed.
+                // Retrying cannot help, so stop and say what to do.
+                if (!wasReady && g.device.bondState != BluetoothDevice.BOND_BONDED && ++refusals >= 2) {
+                    wanted = null
+                    prefs.edit().remove("address").apply()
+                    _connection.value = Connection.Failed(REFUSED)
+                    return
+                }
                 if (wanted != null) {
                     _connection.value = Connection.Connecting(g.device.address)
                     scheduleReconnect()

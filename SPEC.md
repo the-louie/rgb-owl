@@ -124,6 +124,9 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   connect. The schedule is inactive until the clock has been set once.
 - **New-phone pairing** only during the first 3 minutes after boot; bonded phones connect any time.
   Unknown phones connecting later are disconnected at once (`PAIRING_WINDOW_MS`, T-32).
+  Advertising carries manufacturer data 0xFFFF + 1 byte (1 = pairing window open), so the app's scan list
+  says "Ready to pair" or "unplug the owl, then pair within 3 minutes". After 2 refused attempts on an
+  unpaired owl the app stops retrying and shows that hint.
 - **Crash info:** last panic/watchdog reason + time kept in NVS, shown in `/api/debug` and the app Developer screen.
 
 ### Boot status display (whole-owl phases)

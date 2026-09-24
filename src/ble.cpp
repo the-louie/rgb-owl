@@ -37,6 +37,20 @@ static Link links[MAX_LINKS];
 static portMUX_TYPE linksMux = portMUX_INITIALIZER_UNLOCKED;
 static String lastState;
 static uint32_t lastPoll;
+static bool advPairingOpen = true;
+
+// (Re)starts advertising with the current pairing-window flag.
+static void advertise(bool pairingOpen) {
+    NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
+    adv->stop();
+    std::string md;
+    md += char(ADV_COMPANY_ID & 0xFF);
+    md += char(ADV_COMPANY_ID >> 8);
+    md += char(pairingOpen ? 1 : 0);
+    adv->setManufacturerData(md);
+    adv->start();
+    advPairingOpen = pairingOpen;
+}
 
 static bool isAuthed(uint16_t handle) {
     bool ok = false;
@@ -277,8 +291,8 @@ void begin() {
 
     NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
     adv->addServiceUUID(SERVICE_UUID);
-    adv->setScanResponse(true);
-    adv->start();
+    adv->setScanResponse(true);  // the name goes in the scan response
+    advertise(pairingAllowed(false, millis(), config::PAIRING_WINDOW_MS));
     log::printf("ble: advertising as Owl, %d bonded phone(s)", NimBLEDevice::getNumBonds());
 }
 
@@ -296,6 +310,10 @@ void loop() {
     if (now - lastPoll < STATE_POLL_MS) return;
     lastPoll = now;
     pushState(false);
+    if (advPairingOpen && !pairingAllowed(false, now, config::PAIRING_WINDOW_MS)) {
+        advertise(false);
+        log::printf("ble: pairing window closed; only bonded phones can connect");
+    }
 
     // drop links that never authenticated (e.g. a stranger without the PIN)
     uint16_t drop[MAX_LINKS];

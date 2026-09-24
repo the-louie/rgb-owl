@@ -5,6 +5,8 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()  // targetSdk 35 draws edge-to-edge anyway; screens pad for the system bars
         super.onCreate(savedInstanceState)
         granted.value = permissions.all { ContextCompat.checkSelfPermission(this, it) == PackageManager.PERMISSION_GRANTED }
         if (granted.value) vm.start() else request.launch(permissions)
@@ -48,11 +51,11 @@ class MainActivity : ComponentActivity() {
                 Surface(Modifier.fillMaxSize()) {
                     val connection by vm.client.connection.collectAsState()
                     when {
-                        !granted.value -> Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        !granted.value -> Column(Modifier.safeDrawingPadding().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                             Text("The app needs Bluetooth permission to find and control the owl.")
                             Button(onClick = { request.launch(permissions) }) { Text("Grant") }
                         }
-                        !vm.client.bluetoothEnabled -> Text("Turn on Bluetooth.", Modifier.padding(16.dp))
+                        !vm.client.bluetoothEnabled -> Text("Turn on Bluetooth.", Modifier.safeDrawingPadding().padding(16.dp))
                         connection is Connection.Ready -> OwlTabs(vm)
                         else -> ConnectScreen(vm)
                     }
