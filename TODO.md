@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 06, in progress (opened 2026-09-24)
-**Current ticket:** T-45 (`in-progress` — App firmware section: version, latest release, Check, Install, progress)
-**Last completed:** T-44 (`done` — commit `092549f`)
+**Current ticket:** T-46 (`todo` — APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release`)
+**Last completed:** T-45 (`done` — commit `315ba5e`)
 
 ## Conventions
 
@@ -130,7 +130,7 @@ events; an unsigned or tampered one is refused; a crash-looping image rolls back
 | T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | done | Landed in `d6e1e86` |
 | T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | done | ArduinoJson filter; Landed in `ba9cdee` |
 | T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | done | Landed in `092549f` |
-| T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | in-progress | |
+| T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | done | Landed in `315ba5e` |
 | T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | todo | CI secret later |
 | T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | todo | |
 | T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | todo | runs once the repo exists |
