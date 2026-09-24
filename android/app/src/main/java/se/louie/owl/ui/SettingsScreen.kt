@@ -111,8 +111,22 @@ fun SettingsScreen(vm: OwlViewModel) {
             "A newer release is installed automatically. The owl also checks at every start and once a day.",
             style = MaterialTheme.typography.bodySmall,
         )
+
+        Section("App")
+        val appStatus by vm.appUpdateStatus.collectAsState()
+        val appRelease by vm.appRelease.collectAsState()
+        Text("App version ${se.louie.owl.BuildInfo.versionName}")
+        appStatus?.let { Text(it) }
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButtonCompat("Check app update", enabled = !project.isNullOrEmpty()) { vm.checkAppUpdate(s.devmode) }
+            if (appRelease != null) Button(onClick = vm::installAppUpdate) { Text("Update app") }
+        }
     }
 }
+
+@Composable
+private fun OutlinedButtonCompat(label: String, enabled: Boolean, onClick: () -> Unit) =
+    androidx.compose.material3.OutlinedButton(onClick = onClick, enabled = enabled) { Text(label) }
 
 @Composable
 private fun Section(title: String) {

@@ -159,6 +159,40 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
         send("update_check")
     }
 
+    private val appUpdater = se.louie.owl.update.AppUpdater(app)
+    private val _appUpdate = MutableStateFlow<String?>(null)  // status line for the app update
+    val appUpdateStatus: StateFlow<String?> = _appUpdate.asStateFlow()
+    private val _appRelease = MutableStateFlow<se.louie.owl.update.AppRelease?>(null)
+    val appRelease: StateFlow<se.louie.owl.update.AppRelease?> = _appRelease.asStateFlow()
+
+    /** Looks for a newer app build in the owl project's releases (pre-releases in developer mode). */
+    fun checkAppUpdate(includePre: Boolean) {
+        val p = _project.value
+        if (p.isNullOrEmpty()) return
+        viewModelScope.launch {
+            _appUpdate.value = "Checking…"
+            try {
+                val r = appUpdater.check(p, includePre)
+                _appRelease.value = r
+                _appUpdate.value = if (r == null) "The app is up to date" else "App ${r.tag} is available"
+            } catch (e: Exception) {
+                _appUpdate.value = "App update check failed: ${e.message}"
+            }
+        }
+    }
+
+    fun installAppUpdate() {
+        val r = _appRelease.value ?: return
+        viewModelScope.launch {
+            try {
+                appUpdater.install(r) { _appUpdate.value = "Downloading app $it %" }
+                _appUpdate.value = "Confirm the installation in Android's dialog"
+            } catch (e: Exception) {
+                _appUpdate.value = "App update failed: ${e.message}"
+            }
+        }
+    }
+
     fun setProject(url: String) = send(Protocol.command("project", "url" to url))
 
     /** Called once permissions are granted: reconnect to the remembered owl, if any. */
