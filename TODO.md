@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 04, in progress (opened 2026-09-24)
-**Current ticket:** T-21 (`todo` — Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests)
+**Current ticket:** T-21 (`in-progress` — Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests)
 **Last completed:** T-20 (`done` — commit `637f569`)
 
 ## Conventions
@@ -84,7 +84,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 |---|---|---|---|---|---|
 | T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | done | SPEC v2 §Release; Landed in `5a0f77d` |
 | T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | done | Landed in `637f569` |
-| T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | todo | SPEC v2 §BLE |
+| T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | in-progress | SPEC v2 §BLE |
 | T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | todo | check NimBLE version vs core 2.0.17 |
 | T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | todo | |
 | T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | todo | SPEC v2 §Improvements |
