@@ -22,6 +22,25 @@ data class OwlState(
     val version: String = "",
 )
 
+/** `config` event: settings that do not fit the state notification (firmware: src/ble.cpp). */
+@Serializable
+data class OwlConfig(
+    val cycle: Long = 0x7FFFFFFF,
+    val night: Boolean = true,
+    @SerialName("night_from") val nightFrom: Int = 23 * 60,
+    @SerialName("night_to") val nightTo: Int = 7 * 60,
+    @SerialName("time_set") val timeSet: Boolean = false,
+    val tz: String = "",
+) {
+    fun inCycle(effect: Int) = effect in 0..30 && (cycle shr effect) and 1L == 1L
+
+    /** Mask with [effect] switched on or off. */
+    fun withCycle(effect: Int, on: Boolean): Long = if (on) cycle or (1L shl effect) else cycle and (1L shl effect).inv()
+}
+
+/** "HH:MM" for minutes after midnight. */
+fun formatMinutes(m: Int): String = "%02d:%02d".format((m / 60) % 24, m % 60)
+
 /** Reply on the `event` characteristic. `fields` keeps the whole object for event types added later. */
 data class OwlEvent(val type: String, val verb: String?, val msg: String?, val fields: JsonObject)
 
@@ -48,6 +67,8 @@ object Protocol {
     fun parseState(text: String): OwlState = json.decodeFromString(OwlState.serializer(), text)
 
     fun parseEffects(text: String): List<String> = json.decodeFromString(text)
+
+    fun parseConfig(fields: JsonObject): OwlConfig = json.decodeFromJsonElement(OwlConfig.serializer(), fields)
 
     fun parseEvent(text: String): OwlEvent {
         val o = json.decodeFromString(JsonObject.serializer(), text)

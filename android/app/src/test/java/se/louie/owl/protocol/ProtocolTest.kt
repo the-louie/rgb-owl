@@ -47,6 +47,34 @@ class ProtocolTest {
     fun parsesEffects() = assertEquals(listOf("plasma", "rain"), Protocol.parseEffects("[\"plasma\",\"rain\"]"))
 
     @Test
+    fun parsesConfigEvent() {
+        val e = Protocol.parseEvent(
+            "{\"type\":\"config\",\"cycle\":9,\"night\":true,\"night_from\":1380,\"night_to\":420," +
+                "\"time_set\":true,\"tz\":\"CET-1CEST,M3.5.0,M10.5.0/3\"}",
+        )
+        val c = Protocol.parseConfig(e.fields)
+        assertEquals(9L, c.cycle)
+        assertEquals(1380, c.nightFrom)
+        assertEquals(true, c.inCycle(0))
+        assertEquals(false, c.inCycle(1))
+        assertEquals(true, c.inCycle(3))
+    }
+
+    @Test
+    fun cycleMaskToggle() {
+        val c = OwlConfig(cycle = 0b1001)
+        assertEquals(0b1011L, c.withCycle(1, true))
+        assertEquals(0b0001L, c.withCycle(3, false))
+    }
+
+    @Test
+    fun minutes() {
+        assertEquals("23:00", formatMinutes(1380))
+        assertEquals("07:05", formatMinutes(425))
+        assertEquals("00:00", formatMinutes(0))
+    }
+
+    @Test
     fun parsesEvents() {
         val ok = Protocol.parseEvent("{\"type\":\"ok\",\"verb\":\"set\"}")
         assertEquals("ok", ok.type)

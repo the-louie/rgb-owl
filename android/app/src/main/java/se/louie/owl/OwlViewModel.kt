@@ -10,6 +10,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import se.louie.owl.ble.OwlBleClient
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonPrimitive
+import se.louie.owl.protocol.OwlConfig
 import se.louie.owl.protocol.Protocol
 
 data class FoundOwl(val address: String, val name: String?, val rssi: Int)
@@ -25,11 +28,36 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
     val error: StateFlow<String?> = _error.asStateFlow()
     private var scanJob: Job? = null
 
+    private val _config = MutableStateFlow<OwlConfig?>(null)
+    val config: StateFlow<OwlConfig?> = _config.asStateFlow()
+    private val _project = MutableStateFlow<String?>(null)
+    val project: StateFlow<String?> = _project.asStateFlow()
+
     init {
         viewModelScope.launch {
-            client.events.collect { e -> if (e.type == "error") _error.value = "${e.verb}: ${e.msg}" }
+            client.events.collect { e ->
+                when (e.type) {
+                    "error" -> _error.value = "${e.verb}: ${e.msg}"
+                    "config" -> _config.value = Protocol.parseConfig(e.fields)
+                    "project" -> _project.value = e.fields["project"]?.jsonPrimitive?.contentOrNull
+                }
+            }
         }
     }
+
+    /** Asks the owl for the settings that are not in the state notification. */
+    fun refreshConfig() {
+        send("config")
+        send("project")
+    }
+
+    /** Sets config-event settings (cycle, night…) and re-reads them. */
+    fun setConfig(vararg args: Pair<String, Any>) {
+        set(*args)
+        send("config")
+    }
+
+    fun setProject(url: String) = send(Protocol.command("project", "url" to url))
 
     /** Called once permissions are granted: reconnect to the remembered owl, if any. */
     fun start() {

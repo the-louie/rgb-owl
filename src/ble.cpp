@@ -12,6 +12,7 @@
 #include "crash.h"
 #include "owl/pairing.h"
 #include "owl/protocol.h"
+#include "update.h"
 
 namespace owl::ble {
 
@@ -170,6 +171,15 @@ static void handle(const char* line) {
             .num("crashes", long(crash::count())).num("rssi", net::online() ? WiFi.RSSI() : 0)
             .num("bonds", NimBLEDevice::getNumBonds());
         if (const char* j = b.finish()) sendEvent(j);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "project")) {  // project [url=<GitHub URL or owner/repo>] -> project event
+        if (const char* url = cmd.get("url"))
+            if (!update::setProject(url)) return sendResult(verb, "not a GitHub project");
+        char buf[200];
+        JsonWriter w(buf, sizeof(buf));
+        w.str("type", "project").str("project", update::project().c_str());
+        if (const char* j = w.finish()) sendEvent(j);
         return sendResult(verb, nullptr);
     }
     if (!strcmp(verb, "time")) {  // time epoch=<unix seconds>&tz=<POSIX TZ>

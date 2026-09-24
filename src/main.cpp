@@ -8,11 +8,13 @@
 #include "net.h"
 #include "ota.h"
 #include "reset.h"
+#include "update.h"
 
 void setup() {
     Serial.begin(115200);
     owl::crash::begin();
     owl::clock::begin();
+    owl::update::begin();
     owl::app::begin();
     owl::reset::begin();
     owl::ble::begin();

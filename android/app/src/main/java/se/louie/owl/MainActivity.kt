@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
@@ -51,11 +53,34 @@ class MainActivity : ComponentActivity() {
                             Button(onClick = { request.launch(permissions) }) { Text("Grant") }
                         }
                         !vm.client.bluetoothEnabled -> Text("Turn on Bluetooth.", Modifier.padding(16.dp))
-                        connection is Connection.Ready -> MainScreen(vm)
+                        connection is Connection.Ready -> OwlTabs(vm)
                         else -> ConnectScreen(vm)
                     }
                 }
             }
+        }
+    }
+}
+
+@androidx.compose.runtime.Composable
+private fun OwlTabs(vm: OwlViewModel) {
+    var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    androidx.compose.material3.Scaffold(
+        bottomBar = {
+            androidx.compose.material3.NavigationBar {
+                listOf("Owl", "Settings").forEachIndexed { i, label ->
+                    NavigationBarItem(
+                        selected = tab == i,
+                        onClick = { tab = i },
+                        icon = { Text(if (i == 0) "🦉" else "⚙") },
+                        label = { Text(label) },
+                    )
+                }
+            }
+        },
+    ) { pad ->
+        androidx.compose.foundation.layout.Box(Modifier.padding(pad)) {
+            if (tab == 0) MainScreen(vm) else se.louie.owl.ui.SettingsScreen(vm)
         }
     }
 }
