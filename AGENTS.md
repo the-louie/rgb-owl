@@ -22,8 +22,8 @@ in `SPEC.md`, and it is the source of truth for behaviour.
 3. **Commits:** only when asked, or inside the sprint loop, which is standing permission.
    The loop makes 3 commits per ticket (`T-XX: start` / `T-XX: <title>` / `T-XX: close`)
    as The Louie, with no attribution trailer.
-4. **Gate:** `pio test -e native` must pass and `pio run -e s3zero` must build before
-   work counts as done. Hardware behaviour can't be verified here, so say so.
+4. **Gate:** `pio test -e native` must pass, `pio run -e s3zero` must build, and
+   `tools/build-app.sh` must pass for app changes, before work counts as done. Hardware behaviour can't be verified here, so say so.
 5. Keep `SPEC.md` (what), `AGENTS.md` (how and why, ledger) and the code consistent.
 6. Answers to the user: outcome first, short, and numbers instead of adjectives.
 7. **Planning / backlog:** `TODO.md` (roadmap, active sprint, backlog, retros in one file).
@@ -81,8 +81,10 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 
 - JDK 17: `~/.local/jdk/current`. Android SDK: `~/.local/android-sdk` (platform 35, build-tools 35/34).
   Gradle 8.11.1: `~/.local/gradle-8.11.1` (projects use the wrapper). Installed 2026-09-24.
-- `export JAVA_HOME=~/.local/jdk/current ANDROID_HOME=~/.local/android-sdk`, then in `android/`:
-  `./gradlew --no-daemon testDebugUnitTest assembleDebug`.
+- `tools/build-app.sh` runs the JVM tests + `assembleDebug` (sets JAVA_HOME/ANDROID_HOME) and copies
+  the APK to `dist/owl-app-debug.apk`. It takes about 3–6 min on this host. App package: `se.louie.owl`.
+- App version = firmware scheme (`git describe`); versionCode X·10⁶+Y·10⁴+Z·100+(99 release | N dev),
+  computed in `android/app/build.gradle.kts`.
 - **Memory:** the host has ~1.5 GB free. With default settings the Gradle daemon is OOM-killed. Keep
   `org.gradle.jvmargs=-Xmx1024m`, `org.gradle.workers.max=1` and
   `kotlin.compiler.execution.strategy=in-process` in `gradle.properties`.
