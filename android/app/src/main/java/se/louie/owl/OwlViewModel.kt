@@ -40,6 +40,10 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
 
     init {
         viewModelScope.launch {
+            // on every (re)connect: give the owl the phone's clock + timezone (night schedule)
+            client.connection.collect { if (it is se.louie.owl.ble.Connection.Ready) sendTime() }
+        }
+        viewModelScope.launch {
             client.events.collect { e ->
                 when (e.type) {
                     "error" -> {
@@ -136,6 +140,14 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
 
     fun test(mode: String, index: Int = 0, r: Int = 0, g: Int = 0, b: Int = 0) =
         send(Protocol.command("test", "mode" to mode, "index" to index, "r" to r, "g" to g, "b" to b))
+
+    fun sendTime() = send(
+        Protocol.command(
+            "time",
+            "epoch" to System.currentTimeMillis() / 1000,
+            "tz" to se.louie.owl.time.PosixTz.of(java.time.ZoneId.systemDefault()),
+        ),
+    )
 
     fun setProject(url: String) = send(Protocol.command("project", "url" to url))
 
