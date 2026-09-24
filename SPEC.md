@@ -130,7 +130,8 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   unsigned (password-protected).
 - **Rollback:** a new image must reach "BLE advertising + 60 s up" to be marked valid; otherwise the
   bootloader reverts to the previous image.
-- Recovery: hold BOOT for 5 s → forget bonded phones and WiFi credentials.
+- Recovery: hold BOOT for 5 s → forget bonded phones and WiFi credentials, three red flashes, restart
+  (implemented T-23).
 
 ### Release
 - **GitHub Actions CI:** tests + builds on every push; a pushed tag builds, signs and publishes the

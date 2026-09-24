@@ -49,6 +49,7 @@ in `SPEC.md`, and it is the source of truth for behaviour.
   GPIO33–37 (not broken out; used by PSRAM), or GPIO47/48 (not broken out).
 - Edge header pins: 5V, GND, 3V3, GPIO1–13, TX(43), RX(44).
   GPIO14–18 are bottom pads only (for soldering or pogo pins).
+- GPIO0 = BOOT button, read at runtime for the 5 s recovery reset (input only; never drive it).
 - Free for future use: GPIO2, 4–13. GPIO21 can serve as a status LED (onboard WS2812).
 - 5 V pad input range is 3.7–6 V. The onboard LDO is an ME6217C33M5G (800 mA max).
   Never route LED current through the board.

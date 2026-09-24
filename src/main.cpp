@@ -5,10 +5,12 @@
 #include "http.h"
 #include "net.h"
 #include "ota.h"
+#include "reset.h"
 
 void setup() {
     Serial.begin(115200);
     owl::app::begin();
+    owl::reset::begin();
     owl::ble::begin();
     owl::net::begin();
     owl::ota::begin();
@@ -16,6 +18,7 @@ void setup() {
 
 void loop() {
     owl::app::loop();
+    owl::reset::loop();
     owl::ble::loop();
     owl::net::loop();
     owl::http::loop();

@@ -6,6 +6,8 @@
 namespace owl::config {
 
 constexpr uint8_t LED_PIN = 1;              // GPIO1, WS2812B DIN (3.3 V direct)
+constexpr uint8_t BOOT_BUTTON_PIN = 0;       // BOOT button (strapping pin; read-only use at runtime)
+constexpr uint32_t RESET_HOLD_MS = 5000;     // hold BOOT this long: forget bonds + WiFi
 constexpr uint8_t LED_VOLTS = 5;
 constexpr uint32_t LED_MAX_MILLIAMPS = 4000;  // 62 LEDs x 60 mA = 3.7 A; protects wiring if count/PSU change
 constexpr uint32_t COLOR_CORRECTION = 0xFFB0F0;  // FastLED TypicalLEDStrip; tune via POST /api/color
