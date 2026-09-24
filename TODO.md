@@ -5,7 +5,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 
 ## Current position
 
-**Active sprint:** Sprint 05, in progress (opened 2026-09-24)
+**Active sprint:** Sprint 06, in progress (opened 2026-09-24)
 **Current ticket:** —
 **Last completed:** T-39 (`done` — commit `70eb251`)
 
@@ -92,7 +92,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 | T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | done | Landed in `9ddbbcb` |
 | T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | done | Landed in `f748d28` |
 
-## Sprint 05 — WiFi v2, boot status, settings
+## Sprint 05 — WiFi v2, boot status, settings (done 2026-09-24)
 
 **Goal:** Everything except updates is configured from the app, and WiFi is only up in the boot
 window or debug mode.
@@ -115,16 +115,26 @@ screens work; the night schedule turns the LEDs off.
 | T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | done | Landed in `5b83b97` |
 | T-39 | App pushes phone time + timezone on every connect | 1h | T-34 | done | Landed in `70eb251` |
 
-## Sprint 06 — updates + release (sketch)
+## Sprint 06 — updates + release
 
-- Firmware: GitHub latest-release lookup (HTTPS, cert bundle), semver compare, download
-  `owl-firmware.bin` with progress events, auto-install at boot + every 24 h, rollback (valid after BLE up 60 s).
-- App: firmware section (version, check, install, progress), self-update from `owl-app.apk`.
-- Pre-release channel: ignored unless in debug mode.
-- Signed firmware: signing key, signature appended in the release build, verified by the owl for GitHub updates.
-- GitHub Actions: test + build on push; on a tag, sign firmware + APK (keystore as a CI secret) and publish the release.
-- Release: scrub the OTA password from git history, create the public GitHub repo (user confirms
-  name, after `gh auth login`), `tools/release.sh` tag → build → `gh release` with 3 assets.
+**Goal:** The owl updates itself from signed GitHub releases, and the app can check, install and
+update itself.
+**Demo:** gate passes. On the owl: a signed test image served from the dev host installs with progress
+events; an unsigned or tampered one is refused; a crash-looping image rolls back. Once the repo exists
+(T-49, user), a tagged push publishes the release and the owl installs it at boot.
+
+| ID | Title | Est | Deps | Status | Notes |
+|---|---|---|---|---|---|
+| T-40 | Rollback: mark the new image valid only after BLE is up + 60 s (`verifyRollbackLater`); log/report rollbacks | 2h | — | todo | core has APP_ROLLBACK_ENABLE |
+| T-41 | Firmware signing: ECDSA P-256 over SHA-256, `tools/sign-firmware.py`, key in gitignored `keys/`, public key in `include/`; owl verifies with mbedTLS | 4h | — | todo | |
+| T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | todo | |
+| T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | todo | ArduinoJson filter |
+| T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | todo | |
+| T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | todo | |
+| T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | todo | CI secret later |
+| T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | todo | |
+| T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | todo | runs once the repo exists |
+| T-49 | Scrub the OTA password from history, create the public repo, push, set CI secrets, first release | 2h | T-48 | todo | **needs the user:** `gh auth login` + repo name |
 
 ## Backlog
 
@@ -186,3 +196,15 @@ Unscheduled, in rough priority order. Sprint 03 draws from here.
 - **Backlog:** 0 rows closed/added (Sprint 04 came from the SPEC). Open: `gh auth` + repo name, final eye LEDs.
 - **Next:** Sprint 05. Once WiFi goes off by default, the dev loop uses the boot window:
   OTA → reboot → `POST /api/devmode` within 3 min.
+
+### Sprint 05 (2026-09-24)
+
+- **Demo:** 89 native + 27 JVM tests pass. Checked on the owl: v1 WiFi credentials migrated, 3-min
+  window, debug mode via HTTP/BLE, the WiFi commands (scan, wrong password, not found), boot status
+  (5.1 s), NTP + phone TZ, config/project/test/debug commands. **Nothing tried on the phone yet** (Sprints 04 + 05 UI).
+- **Worked:** `POST /api/cmd` tests the BLE command layer over HTTP without a BLE adapter.
+  `tools/owl-dev.sh` keeps the dev loop alive despite WiFi being off by default.
+- **Didn't:** 2 bugs were caught only on real data (GitHub owner with a dot, TZDB lastSun encoding).
+  Both are now pinned by tests.
+- **Backlog:** 0 rows (S05 came from the SPEC). Open: `gh auth` + repo name (now ticket T-49), final eye LEDs.
+- **Next:** Sprint 06. The CA bundle for GitHub HTTPS is an assumption to verify in T-42.
