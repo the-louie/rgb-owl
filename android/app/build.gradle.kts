@@ -67,6 +67,11 @@ android {
             isMinifyEnabled = false
             signingConfig = signingConfigs.findByName("release")
         }
+        // Debug builds use the release key too when it is available, so a dev APK installs over
+        // the GitHub release (Android refuses updates signed with a different key).
+        debug {
+            signingConfigs.findByName("release")?.let { signingConfig = it }
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
