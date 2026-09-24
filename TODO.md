@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 06, in progress (opened 2026-09-24)
-**Current ticket:** T-44 (`todo` — Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install`)
+**Current ticket:** T-44 (`in-progress` — Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install`)
 **Last completed:** T-43 (`done` — commit `ba9cdee`)
 
 ## Conventions
@@ -129,7 +129,7 @@ events; an unsigned or tampered one is refused; a crash-looping image rolls back
 | T-41 | Firmware signing: ECDSA P-256 over SHA-256, `tools/sign-firmware.py`, key in gitignored `keys/`, public key in `include/`; owl verifies with mbedTLS | 4h | — | done | Landed in `314efe3` |
 | T-42 | Installer: stream an image URL (HTTPS, CA bundle) into the OTA slot + signature check + progress events; debug-mode `update_url` hook for testing | 4h | T-41 | done | Landed in `d6e1e86` |
 | T-43 | GitHub release lookup: latest (pre-releases only in debug mode), semver vs `OWL_VERSION`, asset URLs | 3h | T-42 | done | ArduinoJson filter; Landed in `ba9cdee` |
-| T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | todo | |
+| T-44 | Update scheduler: check at boot (window) + every 24 h (WiFi held on), auto-install; boot status phase 3; BLE `update_check` / `update_install` | 3h | T-43 | in-progress | |
 | T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | todo | |
 | T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | todo | CI secret later |
 | T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | todo | |
