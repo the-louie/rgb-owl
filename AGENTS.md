@@ -101,6 +101,9 @@ debug mode: `curl -d password=… http://10.13.110.163/api/devmode` right after 
 
 ## Build and flash
 
+First: `cp secrets.ini.example secrets.ini` and fill in (OTA password, BLE PIN). Without it
+every PlatformIO command fails with `No section: 'owl_secrets'` (on purpose).
+
 ```sh
 pio run                                      # build
 pio run -t upload                            # USB (first time: hold BOOT while plugging in)

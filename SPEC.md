@@ -160,7 +160,7 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   - `POST /api/reboot`
 - OTA: ArduinoOTA (`pio run -e s3zero-ota -t upload`, espota to `owl.local`) and `.bin` upload in
   the web UI (`POST /update`, multipart, `password` field before the file). Both require the OTA
-  password (`[owl] ota_password` in `platformio.ini`); the rest of the web UI is open.
+  password (`ota_password` in gitignored `secrets.ini`); the rest of the web UI is open.
 
 ## Software
 
