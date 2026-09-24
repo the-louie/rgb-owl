@@ -1,4 +1,5 @@
 import java.io.ByteArrayOutputStream
+import java.util.Properties
 
 plugins {
     id("com.android.application")
@@ -31,6 +32,16 @@ val (owlVersionName, owlVersionCode) = run {
     else "$ma.$mi.${pa + 1}-dev.$n" to (ma * 1_000_000 + mi * 10_000 + (pa + 1) * 100 + minOf(n, 98))
 }
 
+// Release signing: keys/owl-app.properties locally (gitignored), or OWL_KEYSTORE_* env vars in CI.
+// The same key must sign every release, or the app's self-update cannot install over the old one.
+val signing = Properties().apply {
+    val f = rootProject.file("../keys/owl-app.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+    System.getenv("OWL_KEYSTORE_FILE")?.let { setProperty("storeFile", it) }
+    System.getenv("OWL_KEYSTORE_PASSWORD")?.let { setProperty("storePassword", it); setProperty("keyPassword", it) }
+    if (getProperty("keyAlias") == null) setProperty("keyAlias", "owl")
+}
+
 android {
     namespace = "se.louie.owl"
     compileSdk = 35
@@ -40,6 +51,22 @@ android {
         targetSdk = 35
         versionCode = owlVersionCode
         versionName = owlVersionName
+    }
+    signingConfigs {
+        if (signing.getProperty("storeFile") != null) {
+            create("release") {
+                storeFile = file(signing.getProperty("storeFile"))
+                storePassword = signing.getProperty("storePassword")
+                keyAlias = signing.getProperty("keyAlias")
+                keyPassword = signing.getProperty("keyPassword")
+            }
+        }
+    }
+    buildTypes {
+        release {
+            isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("release")
+        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

@@ -83,6 +83,9 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
   Gradle 8.11.1: `~/.local/gradle-8.11.1` (projects use the wrapper). Installed 2026-09-24.
 - `tools/build-app.sh` runs the JVM tests + `assembleDebug` (sets JAVA_HOME/ANDROID_HOME) and copies
   the APK to `dist/owl-app-debug.apk`. It takes about 3–6 min on this host. App package: `se.louie.owl`.
+- Release APK: `tools/build-app.sh release` → `dist/owl-app-release.apk`, signed with `keys/owl-app.jks`
+  (passwords in `keys/owl-app.properties`; CI uses `OWL_KEYSTORE_FILE` / `OWL_KEYSTORE_PASSWORD`).
+  Cert SHA-256 `ec53962f…ab06`. Every release must use this key.
 - App version = firmware scheme (`git describe`); versionCode X·10⁶+Y·10⁴+Z·100+(99 release | N dev),
   computed in `android/app/build.gradle.kts`.
 - **Memory:** the host has ~1.5 GB free. With default settings the Gradle daemon is OOM-killed. Keep
@@ -244,4 +247,5 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-24 | EVENT    | Disk: __docs + dist moved to /mnt/backup/owl (symlinked), scratch experiments (474 MB) offloaded; root 20 GB free
 2026-09-24 | EVENT    | Firmware signing key generated: keys/owl-signing.pem (gitignored, local only) - user must back it up; public key committed in include/signing_key.h
 2026-09-24 | OPEN     | Back up keys/owl-signing.pem offline (losing it = owls can only be updated over USB/debug mode)
+2026-09-24 | EVENT    | APK release keystore generated: keys/owl-app.jks + keys/owl-app.properties (gitignored, local only) - user must back them up with keys/owl-signing.pem
 ```
