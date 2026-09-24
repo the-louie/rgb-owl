@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 05, in progress (opened 2026-09-24)
-**Current ticket:** T-38 (`in-progress` — App Developer screen (hidden): debug toggle, IP, debug fields, test patterns)
-**Last completed:** T-37 (`done` — commit `5bf9b12`)
+**Current ticket:** T-39 (`todo` — App pushes phone time + timezone on every connect)
+**Last completed:** T-38 (`done` — commit `5b83b97`)
 
 ## Conventions
 
@@ -112,7 +112,7 @@ screens work; the night schedule turns the LEDs off.
 | T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | done | Landed in `a9043bc` |
 | T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | done | Landed in `e740312` |
 | T-37 | App WiFi section: owl scan list + manual SSID, password, Test, Save gated on a pass | 3h | T-29, T-36 | done | Landed in `5bf9b12` |
-| T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | in-progress | |
+| T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | done | Landed in `5b83b97` |
 | T-39 | App pushes phone time + timezone on every connect | 1h | T-34 | todo | |
 
 ## Sprint 06 — updates + release (sketch)
