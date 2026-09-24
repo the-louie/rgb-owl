@@ -10,6 +10,7 @@
 #include "log.h"
 #include "http.h"
 #include "net.h"
+#include "rollback.h"
 
 namespace owl::ota {
 
@@ -52,6 +53,7 @@ static void uploadChunk() {
             break;
         case UPLOAD_FILE_END:
             if (!rejected && !Update.end(true)) Update.printError(Serial);
+            else if (!rejected) rollback::expectNewImage();
             break;
         case UPLOAD_FILE_ABORTED:
             if (!rejected) Update.abort();
@@ -68,6 +70,7 @@ void begin() {
         log::printf("ota: ArduinoOTA update started");
         blankLeds();
     });
+    ArduinoOTA.onEnd([] { rollback::expectNewImage(); });
     ArduinoOTA.onError([](ota_error_t e) { log::printf("ota: error %u", unsigned(e)); });
 }
 

@@ -31,6 +31,7 @@ void loop() {
     owl::app::loop();
     owl::clock::loop();
     owl::reset::loop();
+    owl::update::loop();
     owl::rollback::loop();
     owl::ble::loop();
     owl::net::loop();

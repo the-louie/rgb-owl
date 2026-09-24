@@ -189,6 +189,14 @@ static void handle(const char* line) {
             return sendResult(verb, "bad test mode or index");
         return sendResult(verb, nullptr);
     }
+    if (!strcmp(verb, "update_url")) {  // debug mode only: update_url url=<image>&sig=<signature>
+        if (!net::devmode()) return sendResult(verb, "debug mode only");
+        const char* url = cmd.get("url");
+        const char* sig = cmd.get("sig");
+        if (!url || !sig) return sendResult(verb, "missing url or sig");
+        if (!net::online()) return sendResult(verb, "wifi not connected");
+        return sendResult(verb, update::installFrom(url, sig) ? nullptr : "update already running");
+    }
     if (!strcmp(verb, "time")) {  // time epoch=<unix seconds>&tz=<POSIX TZ>
         const char* epoch = cmd.get("epoch");
         if (!epoch || strtoul(epoch, nullptr, 10) < 1700000000UL) return sendResult(verb, "bad epoch");
@@ -260,6 +268,7 @@ void begin() {
     svc->start();
     pushState(true);
     net::setEventSink(sendEvent);
+    update::setEventSink(sendEvent);
 
     NimBLEAdvertising* adv = NimBLEDevice::getAdvertising();
     adv->addServiceUUID(SERVICE_UUID);

@@ -11,6 +11,7 @@
 #include "clock.h"
 #include "crash.h"
 #include "rollback.h"
+#include "update.h"
 #include "net.h"
 #include "owl/boot_status.h"
 #include "owl/cycle.h"
@@ -161,7 +162,10 @@ void loop() {
         statusStarted = true;
         bootStatus.begin(now, ble::bondCount() > 0);
     }
-    if (booting && test == Test::None) {
+    if (update::installing()) {  // firmware download: cyan fill, bottom to top
+        booting = false;
+        renderStatus(Visual{Visual::Fill, 0, 220, 255, update::installPercent()}, now);
+    } else if (booting && test == Test::None) {
         renderStatus(bootStatus.update(now, net::status(), UpdateStatus::None, 0), now);
         if (bootStatus.done()) {
             booting = false;

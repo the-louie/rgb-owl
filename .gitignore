@@ -9,3 +9,4 @@ android/app/build/
 android/local.properties
 dist
 keys
+!data/x509_crt_bundle.bin

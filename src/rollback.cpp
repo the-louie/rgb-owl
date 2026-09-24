@@ -1,6 +1,7 @@
 #include "rollback.h"
 
 #include <Arduino.h>
+#include <Preferences.h>
 #include <esp_ota_ops.h>
 
 #include "ble.h"
@@ -20,10 +21,19 @@ void begin() {
     esp_ota_img_states_t st;
     const esp_partition_t* running = esp_ota_get_running_partition();
     pending = esp_ota_get_state_partition(running, &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY;
-    const esp_partition_t* bad = esp_ota_get_last_invalid_partition();
-    rolled = bad != nullptr;
+    // otadata keeps old invalid entries around, so esp_ota_get_last_invalid_partition() is not a
+    // reliable "this boot rolled back" signal. Instead expectNewImage() records the slot we should
+    // come up in; landing anywhere else means the bootloader rolled back.
+    Preferences p;
+    char expected[17] = "";
+    if (p.begin("ota", false)) {
+        p.getString("expect", expected, sizeof(expected));
+        if (expected[0]) p.remove("expect");
+        p.end();
+    }
+    rolled = expected[0] && strcmp(expected, running->label) != 0;
     log::printf("ota: running %s (%s)%s%s", running->label, pending ? "pending verify" : "valid",
-                rolled ? ", rolled back from " : "", rolled ? bad->label : "");
+                rolled ? ", ROLLED BACK from " : "", rolled ? expected : "");
 }
 
 void loop() {
@@ -35,6 +45,15 @@ void loop() {
 }
 
 const char* state() { return pending ? "pending" : "valid"; }
+
+void expectNewImage() {
+    const esp_partition_t* next = esp_ota_get_boot_partition();  // Update.end() already switched it
+    Preferences p;
+    if (next && p.begin("ota", false)) {
+        p.putString("expect", next->label);
+        p.end();
+    }
+}
 bool rolledBack() { return rolled; }
 
 }  // namespace owl::rollback

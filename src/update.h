@@ -10,4 +10,11 @@ void begin();
 String project();                      // "" if not configured
 bool setProject(const char* urlOrRef);  // false if not a GitHub project reference
 
+void loop();  // reports installer progress as events, restarts after a successful install
+// Installs an image from explicit URLs (debug hook; GitHub lookup comes in T-43).
+bool installFrom(const String& imageUrl, const String& sigUrl);
+void setEventSink(void (*sink)(const char* json));
+bool installing();
+uint8_t installPercent();
+
 }  // namespace owl::update
