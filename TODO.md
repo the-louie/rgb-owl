@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 04, in progress (opened 2026-09-24)
-**Current ticket:** T-26 (`todo` — App Main screen: on/off, effect grid (selected + shown), auto-cycle)
+**Current ticket:** T-26 (`in-progress` — App Main screen: on/off, effect grid (selected + shown), auto-cycle)
 **Last completed:** T-25 (`done` — commit `9ddbbcb`)
 
 ## Conventions
@@ -90,7 +90,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 | T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | done | SPEC v2 §Improvements; Landed in `3b6db73` |
 | T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | done | memory-limited Gradle settings; Landed in `c25c839` |
 | T-25 | App BLE layer: scan by service UUID, bond (system PIN dialog), GATT client, remember owl + auto-reconnect; protocol codec + JVM tests | 4h | T-22, T-24 | done | Landed in `9ddbbcb` |
-| T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | todo | |
+| T-26 | App Main screen: on/off, effect grid (selected + shown), auto-cycle | 3h | T-25 | in-progress | |
 
 ## Sprint 05 — WiFi v2, boot status, settings (sketch)
 
