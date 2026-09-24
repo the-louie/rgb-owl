@@ -8,6 +8,7 @@
 #include "effects/effects.h"
 #include "leds.h"
 #include "ble.h"
+#include "clock.h"
 #include "net.h"
 #include "owl/boot_status.h"
 #include "owl/cycle.h"
@@ -80,6 +81,20 @@ static void renderTest(uint32_t now) {
         }
         default: break;
     }
+}
+
+// Night schedule: LEDs off between nightFrom and nightTo once the clock is set.
+static bool nightNow(uint32_t now) {
+    static uint32_t checkedAt = 0;
+    static bool night = false;
+    if (now - checkedAt >= 1000 || checkedAt == 0) {
+        checkedAt = now | 1;
+        int m = clock::minuteOfDay();
+        bool was = night;
+        night = cfg.night && m >= 0 && isNight(uint16_t(m), cfg.nightFrom, cfg.nightTo);
+        if (night != was) log::printf("night: %s", night ? "LEDs off" : "LEDs back on");
+    }
+    return night;
 }
 
 // Draws one boot status visual on the whole owl (SPEC v2 §Boot status).
@@ -170,7 +185,7 @@ void loop() {
         booting = false;
         if (test != Test::None) {
             renderTest(now);
-        } else if (cfg.on) {
+        } else if (cfg.on && !nightNow(now)) {
             renderEffects(dt);
         } else {
             fill_solid(leds::strip, leds::LAYOUT.numLeds, CRGB::Black);

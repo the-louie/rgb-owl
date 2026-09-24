@@ -7,6 +7,7 @@
 #include "effect.h"
 #include "log.h"
 #include "net.h"
+#include "clock.h"
 #include "config.h"
 #include "owl/pairing.h"
 #include "owl/protocol.h"
@@ -149,8 +150,17 @@ static void handle(const char* line) {
     if (!strcmp(verb, "config")) {  // settings that do not fit the state notification
         char buf[200];
         JsonWriter w(buf, sizeof(buf));
-        w.str("type", "config").num("cycle", long(app::settings().cycle));
+        const Settings& s = app::settings();
+        w.str("type", "config").num("cycle", long(s.cycle)).boolean("night", s.night)
+            .num("night_from", s.nightFrom).num("night_to", s.nightTo).boolean("time_set", clock::valid())
+            .str("tz", clock::tz().c_str());
         if (const char* j = w.finish()) sendEvent(j);
+        return sendResult(verb, nullptr);
+    }
+    if (!strcmp(verb, "time")) {  // time epoch=<unix seconds>&tz=<POSIX TZ>
+        const char* epoch = cmd.get("epoch");
+        if (!epoch || strtoul(epoch, nullptr, 10) < 1700000000UL) return sendResult(verb, "bad epoch");
+        clock::set(strtoul(epoch, nullptr, 10), cmd.get("tz"));
         return sendResult(verb, nullptr);
     }
     if (!strcmp(verb, "wifi_scan")) {

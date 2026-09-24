@@ -80,7 +80,10 @@ Supersedes the v1 connectivity below once Sprint 05 lands.
   `timeout` / `connection failed`), `wifi_save ssid=&pass=` (only exactly the last passing test),
   `wifi_forget`, `wifi_info` (→ `wifi_info` event: configured, ssid, status, ip). `config` (→ `config` event with
   settings that do not fit the state notification: `cycle` bitmask, bit i = effect i in auto-cycle;
-  set it with `set cycle=<mask>`). Each command also gets
+  set it with `set cycle=<mask>`; also `night`, `night_from`, `night_to` (minutes after midnight),
+  `time_set`, `tz`). `time epoch=<unix s>&tz=<POSIX TZ>` sets the clock (the app sends it on connect).
+- Night settings: `set night=1|0&night_from=1380&night_to=420`. The default zone is Europe/Stockholm
+  (`CET-1CEST,M3.5.0,M10.5.0/3`) until the phone sends its own; NTP (pool.ntp.org) syncs while WiFi is up. Each command also gets
   `{"type":"ok"|"error","verb":…,"msg"?}`. The state JSON is the HTTP state plus `"wifi"` (status),
   `"devmode"`, `"version"`; keep it ≤ 240 bytes (notifications are cut at MTU − 3).
 - Debug: `POST /api/cmd line=<command>` runs a command over HTTP (debug mode); events are logged.

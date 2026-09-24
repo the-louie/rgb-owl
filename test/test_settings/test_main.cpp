@@ -91,6 +91,29 @@ static void test_cycle_mask(void) {
     TEST_ASSERT_EQUAL(ApplyResult::BadValue, apply(s, "cycle", "x", 7));
 }
 
+static void test_night_fields(void) {
+    Settings s;
+    TEST_ASSERT_TRUE(s.night);
+    TEST_ASSERT_EQUAL(1380, s.nightFrom);
+    TEST_ASSERT_EQUAL(420, s.nightTo);
+    TEST_ASSERT_EQUAL(ApplyResult::Ok, apply(s, "night", "0", 7));
+    TEST_ASSERT_FALSE(s.night);
+    TEST_ASSERT_EQUAL(ApplyResult::Ok, apply(s, "night_from", "1320", 7));
+    TEST_ASSERT_EQUAL(ApplyResult::Ok, apply(s, "night_to", "9999", 7));
+    TEST_ASSERT_EQUAL(1320, s.nightFrom);
+    TEST_ASSERT_EQUAL(1439, s.nightTo);
+}
+
+static void test_is_night(void) {
+    TEST_ASSERT_TRUE(isNight(23 * 60, 1380, 420));   // 23:00
+    TEST_ASSERT_TRUE(isNight(3 * 60, 1380, 420));    // 03:00
+    TEST_ASSERT_FALSE(isNight(7 * 60, 1380, 420));   // 07:00 = end, exclusive
+    TEST_ASSERT_FALSE(isNight(12 * 60, 1380, 420));
+    TEST_ASSERT_TRUE(isNight(13 * 60, 12 * 60, 14 * 60));  // same-day window
+    TEST_ASSERT_FALSE(isNight(15 * 60, 12 * 60, 14 * 60));
+    TEST_ASSERT_FALSE(isNight(100, 500, 500));             // empty window
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_defaults_match_spec);
@@ -101,5 +124,7 @@ int main() {
     RUN_TEST(test_to_json);
     RUN_TEST(test_to_json_too_small);
     RUN_TEST(test_cycle_mask);
+    RUN_TEST(test_night_fields);
+    RUN_TEST(test_is_night);
     return UNITY_END();
 }
