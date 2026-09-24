@@ -10,5 +10,6 @@ variant="${1:-debug}"
 V="${variant^}"
 ./gradlew --no-daemon -q "test${V}UnitTest" "assemble${V}"
 mkdir -p ../dist
-cp "app/build/outputs/apk/${variant}/app-${variant}.apk" "../dist/owl-app-${variant}.apk"
-echo "dist/owl-app-${variant}.apk"
+version=$(python3 ../tools/version.py)
+cp "app/build/outputs/apk/${variant}/app-${variant}.apk" "../dist/owl-app-${version}-${variant}.apk"
+echo "dist/owl-app-${version}-${variant}.apk"

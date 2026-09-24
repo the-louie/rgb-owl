@@ -34,11 +34,23 @@ static void test_is_newer(void) {
     TEST_ASSERT_FALSE(isNewer("junk", "1.0.0"));
 }
 
+static void test_asset_kind(void) {
+    TEST_ASSERT_TRUE(assetKind("owl-firmware-1.2.3.bin") == Asset::Image);
+    TEST_ASSERT_TRUE(assetKind("owl-firmware-1.2.3.bin.sig") == Asset::Signature);
+    TEST_ASSERT_TRUE(assetKind("owl-firmware.bin") == Asset::Image);  // v1.0.0 naming
+    TEST_ASSERT_TRUE(assetKind("owl-firmware.bin.sig") == Asset::Signature);
+    TEST_ASSERT_TRUE(assetKind("owl-firmware-1.3.0-rc.1.bin") == Asset::Image);
+    TEST_ASSERT_TRUE(assetKind("owl-s3zero-merged-1.2.3.bin") == Asset::Other);
+    TEST_ASSERT_TRUE(assetKind("owl-app-1.2.3.apk") == Asset::Other);
+    TEST_ASSERT_TRUE(assetKind("owl-firmwarex.bin") == Asset::Other);
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_stable_channel);
     RUN_TEST(test_prerelease_channel);
     RUN_TEST(test_empty);
     RUN_TEST(test_is_newer);
+    RUN_TEST(test_asset_kind);
     return UNITY_END();
 }

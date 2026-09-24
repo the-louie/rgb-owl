@@ -10,8 +10,6 @@ extern const uint8_t CA_BUNDLE[] asm("_binary_data_x509_crt_bundle_bin_start");
 
 namespace owl::releases {
 
-constexpr const char* IMAGE_ASSET = "owl-firmware.bin";
-constexpr const char* SIG_ASSET = "owl-firmware.bin.sig";
 constexpr size_t MAX_RELEASES = 10;
 constexpr size_t MAX_BODY = 512 * 1024;  // PSRAM; 10 releases with notes are typically < 100 KB
 constexpr uint32_t STALL_MS = 15000;
@@ -75,8 +73,9 @@ static void run(void*) {
                 JsonObject o = list[best];
                 r.tag = o["tag_name"].as<const char*>();
                 for (JsonObject a : o["assets"].as<JsonArray>()) {
-                    if (a["name"] == IMAGE_ASSET) r.imageUrl = a["browser_download_url"].as<const char*>();
-                    if (a["name"] == SIG_ASSET) r.sigUrl = a["browser_download_url"].as<const char*>();
+                    Asset kind = assetKind(a["name"] | "");
+                    if (kind == Asset::Image) r.imageUrl = a["browser_download_url"].as<const char*>();
+                    if (kind == Asset::Signature) r.sigUrl = a["browser_download_url"].as<const char*>();
                 }
                 r.newer = isNewer(r.tag.c_str(), OWL_VERSION);
                 if (r.newer && (r.imageUrl.isEmpty() || r.sigUrl.isEmpty()))

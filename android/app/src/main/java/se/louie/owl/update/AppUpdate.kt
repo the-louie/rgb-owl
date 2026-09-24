@@ -20,7 +20,8 @@ data class AppRelease(val tag: String, val versionCode: Int, val apkUrl: String)
 
 /** Finding a newer app build in the owl project's releases. Pure; unit-tested. */
 object AppUpdate {
-    const val APK_ASSET = "owl-app.apk"
+    /** "owl-app-1.2.3.apk", or "owl-app.apk" as in v1.0.0. */
+    private val APK_ASSET = Regex("""^owl-app(-\d+\.\d+\.\d+[0-9A-Za-z.\-]*)?\.apk$""")
     private val json = Json { ignoreUnknownKeys = true }
 
     /** versionCode of release tag vX.Y.Z, as android/app/build.gradle.kts computes it; null if not X.Y.Z. */
@@ -36,7 +37,7 @@ object AppUpdate {
             .filter { !it.draft && (includePre || !it.prerelease) }
             .mapNotNull { r ->
                 val code = versionCode(r.tag) ?: return@mapNotNull null
-                val apk = r.assets.firstOrNull { it.name == APK_ASSET } ?: return@mapNotNull null
+                val apk = r.assets.firstOrNull { APK_ASSET.matches(it.name) } ?: return@mapNotNull null
                 AppRelease(r.tag, code, apk.url)
             }
             .filter { it.versionCode > current }

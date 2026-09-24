@@ -27,6 +27,13 @@ class AppUpdateTest {
     fun preReleaseChannel() = assertEquals("v1.3.0", AppUpdate.pick(json, 1, includePre = true)?.tag)
 
     @Test
+    fun versionedApkName() {
+        val j = """[{"tag_name":"v1.4.0","assets":[{"name":"owl-app-1.4.0.apk","browser_download_url":"https://x/a"},
+            {"name":"owl-firmware-1.4.0.bin","browser_download_url":"https://x/f"}]}]"""
+        assertEquals("https://x/a", AppUpdate.pick(j, 1, includePre = false)?.apkUrl)
+    }
+
+    @Test
     fun nothingNewer() = assertNull(AppUpdate.pick(json, AppUpdate.versionCode("v1.2.0")!!, includePre = false))
 
     @Test

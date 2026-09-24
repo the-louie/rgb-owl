@@ -7,7 +7,7 @@
 #                               (needs the repo secrets listed in .github/workflows/ci.yml)
 #
 # Needs: clean tree on main, secrets.ini, keys/ (signing keys), `gh auth login` (local mode).
-# Assets: owl-firmware.bin(.sig), owl-s3zero-merged.bin, owl-app.apk (see tools/release.sh).
+# Assets: owl-firmware-V.bin(.sig), owl-s3zero-merged-V.bin, owl-app-V.apk (+ v1.0.0 copies; tools/release.sh).
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -57,8 +57,7 @@ git push origin "$tag"
 trap - ERR
 if [ "$mode" = local ]; then
     gh release create "$tag" $pre --verify-tag --generate-notes --title "owl $tag" \
-        dist/release/owl-firmware.bin dist/release/owl-firmware.bin.sig \
-        dist/release/owl-s3zero-merged.bin dist/release/owl-app.apk
+        $(ls dist/release/*.bin dist/release/*.sig dist/release/*.apk)
     echo "published $tag"
 else
     echo "pushed $tag; GitHub Actions builds and publishes it"

@@ -85,5 +85,4 @@ jobs:
           pre=""
           case "$GITHUB_REF_NAME" in *-*) pre="--prerelease" ;; esac
           gh release create "$GITHUB_REF_NAME" $pre --generate-notes \
-            dist/release/owl-firmware.bin dist/release/owl-firmware.bin.sig \
-            dist/release/owl-s3zero-merged.bin dist/release/owl-app.apk
+            dist/release/*.bin dist/release/*.sig dist/release/*.apk

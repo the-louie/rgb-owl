@@ -2,6 +2,7 @@
 // Picks the release to install from a list of GitHub releases. Hardware-independent; unit-tested.
 
 #include <stddef.h>
+#include <string.h>
 
 #include "owl/protocol.h"
 
@@ -27,6 +28,22 @@ inline int pickRelease(const ReleaseEntry* r, size_t n, bool includePre) {
         }
     }
     return best;
+}
+
+enum class Asset { Other, Image, Signature };
+
+// Release asset names: "owl-firmware-1.2.3.bin" (+ ".sig"), or the unversioned
+// "owl-firmware.bin" (+ ".sig") that v1.0.0 looks for.
+inline Asset assetKind(const char* name) {
+    const char* p = "owl-firmware";
+    size_t lp = strlen(p), n = strlen(name);
+    if (strncmp(name, p, lp) != 0) return Asset::Other;
+    const char* rest = name + lp;
+    if (*rest != '.' && *rest != '-') return Asset::Other;
+    auto ends = [&](const char* suffix) { size_t ls = strlen(suffix); return n >= ls && !strcmp(name + n - ls, suffix); };
+    if (ends(".bin.sig")) return Asset::Signature;
+    if (ends(".bin") && strncmp(rest, "-s3zero-merged", 14) != 0) return Asset::Image;
+    return Asset::Other;
 }
 
 // True if tag is a newer version than current (e.g. OWL_VERSION).

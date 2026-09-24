@@ -82,8 +82,8 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 - JDK 17: `~/.local/jdk/current`. Android SDK: `~/.local/android-sdk` (platform 35, build-tools 35/34).
   Gradle 8.11.1: `~/.local/gradle-8.11.1` (projects use the wrapper). Installed 2026-09-24.
 - `tools/build-app.sh` runs the JVM tests + `assembleDebug` (sets JAVA_HOME/ANDROID_HOME) and copies
-  the APK to `dist/owl-app-debug.apk`. It takes about 3–6 min on this host. App package: `se.louie.owl`.
-- Release APK: `tools/build-app.sh release` → `dist/owl-app-release.apk`, signed with `keys/owl-app.jks`
+  the APK to `dist/owl-app-<version>-debug.apk`. It takes about 3–6 min on this host. App package: `se.louie.owl`.
+- Release APK: `tools/build-app.sh release` → `dist/owl-app-<version>-release.apk`, signed with `keys/owl-app.jks`
   (passwords in `keys/owl-app.properties`; CI uses `OWL_KEYSTORE_FILE` / `OWL_KEYSTORE_PASSWORD`).
   Cert SHA-256 `ec53962f…ab06`. Every release must use this key.
 - App version = firmware scheme (`git describe`); versionCode X·10⁶+Y·10⁴+Z·100+(99 release | N dev),
@@ -99,8 +99,9 @@ instance (one file per effect in `src/effects/`, accessor in `src/effects/effect
 `./publish.sh X.Y.Z[-pre] [--ci]` is the entry point: it checks for a clean `main`, no secrets in
 history and signing keys, then tags, builds locally, pushes and creates the release (or with `--ci`
 pushes only and lets Actions build). Remote: `origin` = git@github.com:the-louie/rgb-owl.git.
-`tools/release.sh` builds `dist/release/` (owl-firmware.bin + .sig, owl-s3zero-merged.bin, owl-app.apk,
-VERSION). CI (`.github/workflows/ci.yml`) runs the tests and builds on every push. A pushed tag `vX.Y.Z`
+`tools/release.sh` builds `dist/release/` with versioned names (owl-firmware-V.bin + .sig,
+owl-s3zero-merged-V.bin, owl-app-V.apk), unversioned copies of the firmware + APK for v1.0.0 owls/apps,
+and VERSION. CI (`.github/workflows/ci.yml`) runs the tests and builds on every push. A pushed tag `vX.Y.Z`
 (or `vX.Y.Z-rc.N` for a pre-release) runs `tools/release.sh` with repo secrets and publishes the release.
 The tag must equal HEAD's `tools/version.py`. Secrets: OWL_OTA_PASSWORD, OWL_BLE_PIN, OWL_SIGNING_KEY,
 OWL_KEYSTORE_B64, OWL_KEYSTORE_PASSWORD.
