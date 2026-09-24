@@ -166,7 +166,7 @@ void loop() {
         booting = false;
         renderStatus(Visual{Visual::Fill, 0, 220, 255, update::installPercent()}, now);
     } else if (booting && test == Test::None) {
-        renderStatus(bootStatus.update(now, net::status(), UpdateStatus::None, 0), now);
+        renderStatus(bootStatus.update(now, net::status(), update::bootStatus(), update::installPercent()), now);
         if (bootStatus.done()) {
             booting = false;
             EFFECTS[cycler.current()].start();

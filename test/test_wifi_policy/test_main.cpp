@@ -92,6 +92,29 @@ static void test_devmode_needs_configuration(void) {
     TEST_ASSERT_TRUE(p.update(2000, false) == A::Start);
 }
 
+static void test_hold_turns_wifi_on_and_off(void) {
+    WifiPolicy p(CONNECT, WINDOW);
+    p.begin(0, true);
+    p.update(1000, true);
+    p.update(1000 + WINDOW, true);  // window closed -> off
+    p.setHold(true);
+    TEST_ASSERT_TRUE(p.update(500000, false) == A::Start);
+    p.update(501000, true);
+    TEST_ASSERT_TRUE(p.update(900000, true) == A::None);  // held
+    p.setHold(false);
+    TEST_ASSERT_TRUE(p.update(900001, true) == A::Stop);
+}
+
+static void test_hold_gives_up_like_boot(void) {
+    WifiPolicy p(CONNECT, WINDOW);
+    p.begin(0, true);
+    p.update(CONNECT, false);  // boot attempt failed -> off
+    p.setHold(true);
+    TEST_ASSERT_TRUE(p.update(100000, false) == A::Start);
+    TEST_ASSERT_TRUE(p.update(100000 + CONNECT, false) == A::Stop);
+    TEST_ASSERT_TRUE(p.status() == S::Failed);
+}
+
 int main() {
     UNITY_BEGIN();
     RUN_TEST(test_unconfigured_stays_off);
@@ -102,5 +125,7 @@ int main() {
     RUN_TEST(test_devmode_keeps_retrying);
     RUN_TEST(test_link_loss_reconnects_within_window);
     RUN_TEST(test_devmode_needs_configuration);
+    RUN_TEST(test_hold_turns_wifi_on_and_off);
+    RUN_TEST(test_hold_gives_up_like_boot);
     return UNITY_END();
 }

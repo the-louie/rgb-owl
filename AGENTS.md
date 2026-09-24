@@ -103,6 +103,9 @@ help: a power cycle (then `tools/owl-dev.sh <ip> devmode` within 3 min) or the a
 - Inspect: `curl http://10.13.110.163/api/debug`, `/api/log`, and `/api/frame` (what the effect
   actually rendered; use it before guessing at a visual bug report).
 - Test patterns: `curl -d "mode=column&index=0" http://10.13.110.163/api/test` (put back with `mode=none`).
+- Never reboot a freshly flashed image before `/api/debug` shows `ota_state: valid` (60 s):
+  the bootloader treats that as a failed image and rolls back (2026-09-24, cost 2 false alarms).
+- Crashes: `curl …/api/coredump`, then addr2line against the ELF of the *same* build.
 - Anything that reboots the owl (crash tests, rollback) turns debug mode off. Keep a poller running
   that POSTs `/api/devmode` every 1–3 s for 5 min, or the owl drops off WiFi when the window closes
   (happened on 2026-09-24 T-40).

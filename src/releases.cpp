@@ -13,6 +13,8 @@ namespace owl::releases {
 constexpr const char* IMAGE_ASSET = "owl-firmware.bin";
 constexpr const char* SIG_ASSET = "owl-firmware.bin.sig";
 constexpr size_t MAX_RELEASES = 10;
+constexpr size_t MAX_BODY = 512 * 1024;  // PSRAM; 10 releases with notes are typically < 100 KB
+constexpr uint32_t STALL_MS = 15000;
 
 static volatile State st = State::Idle;
 static Result res;
@@ -38,8 +40,26 @@ static void run(void*) {
         filter[0]["draft"] = true;
         filter[0]["assets"][0]["name"] = true;
         filter[0]["assets"][0]["browser_download_url"] = true;
+        // Read the body ourselves: deserializeJson(stream) waits for data in Stream::timedRead(),
+        // which busy-polls and starved IDLE0 into a task-watchdog reset (T-44, seen on the owl).
+        char* body = static_cast<char*>(ps_malloc(MAX_BODY));
+        size_t len = 0;
+        WiFiClient* s = http.getStreamPtr();
+        uint32_t last = millis();
+        while (body && len < MAX_BODY && (s->connected() || s->available())) {
+            int n = s->available();
+            if (n <= 0) {
+                if (millis() - last > STALL_MS) break;
+                delay(10);  // let IDLE0 run
+                continue;
+            }
+            len += s->read(reinterpret_cast<uint8_t*>(body) + len, min(size_t(n), MAX_BODY - len));
+            last = millis();
+        }
         JsonDocument doc;
-        DeserializationError e = deserializeJson(doc, http.getStream(), DeserializationOption::Filter(filter));
+        DeserializationError e = body ? deserializeJson(doc, body, len, DeserializationOption::Filter(filter))
+                                      : DeserializationError::NoMemory;
+        free(body);
         if (e) {
             r.error = String("bad GitHub response: ") + e.c_str();
         } else {

@@ -4,6 +4,8 @@
 
 #include <Arduino.h>
 
+#include "owl/boot_status.h"
+
 namespace owl::update {
 
 void begin();
@@ -14,8 +16,10 @@ void loop();  // reports installer progress as events, restarts after a successf
 // Installs an image from explicit URLs (debug hook; GitHub lookup comes in T-43).
 bool installFrom(const String& imageUrl, const String& sigUrl);
 void setEventSink(void (*sink)(const char* json));
-// Starts a release lookup; reports {"type":"update_info",...}. False if busy/no project/offline.
+// Checks now (WiFi is switched on for it) and installs a newer signed release automatically.
+// Reports {"type":"update_info",...} then update progress. False if busy or not configured.
 bool check();
+UpdateStatus bootStatus();  // for the boot status display
 bool installing();
 uint8_t installPercent();
 

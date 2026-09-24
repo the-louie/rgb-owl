@@ -189,10 +189,10 @@ static void handle(const char* line) {
             return sendResult(verb, "bad test mode or index");
         return sendResult(verb, nullptr);
     }
-    if (!strcmp(verb, "update_check")) {
+    if (!strcmp(verb, "update_check")) {  // checks now; a newer signed release is installed automatically
         if (update::project().isEmpty()) return sendResult(verb, "no GitHub project set");
-        if (!net::online()) return sendResult(verb, "wifi not connected");
-        return sendResult(verb, update::check() ? nullptr : "check already running");
+        if (!net::configured()) return sendResult(verb, "wifi not configured");
+        return sendResult(verb, update::check() ? nullptr : "update already running");
     }
     if (!strcmp(verb, "update_url")) {  // debug mode only: update_url url=<image>&sig=<signature>
         if (!net::devmode()) return sendResult(verb, "debug mode only");

@@ -209,6 +209,8 @@ void setDevmode(bool on) {
     policy.setDevmode(on);
 }
 
+void setHold(bool on) { policy.setHold(on); }
+
 void saveCredentials(const char* s, const char* p) {
     Preferences prefs;
     if (prefs.begin("wifi", false)) {

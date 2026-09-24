@@ -3,6 +3,7 @@
 //   boot, configured  -> Connecting -(link)-> Online for windowMs -> Off
 //   Connecting -(no link for connectMs)-> Off (status Failed)
 //   debug mode keeps WiFi on (and turns it on when Off); link loss -> Connecting
+//   hold (update checks) also keeps/turns WiFi on, but gives up after connectMs like the boot attempt
 // The caller switches the radio on Action::Start / Action::Stop.
 
 #include <stdint.h>
@@ -31,6 +32,8 @@ public:
         if (!c && link_ == Link::Off) status_ = Status::Unconfigured;
     }
     void setDevmode(bool on) { devmode_ = on; }
+    void setHold(bool on) { hold_ = on; }
+    bool hold() const { return hold_; }
     bool devmode() const { return devmode_; }
     Link link() const { return link_; }
     Status status() const { return status_; }
@@ -40,7 +43,7 @@ public:
     Action update(uint32_t nowMs, bool connected) {
         switch (link_) {
             case Link::Off:
-                if (devmode_ && configured_) return enterConnecting(nowMs, Action::Start);
+                if ((devmode_ || hold_) && configured_) return enterConnecting(nowMs, Action::Start);
                 return Action::None;
             case Link::Connecting:
                 if (connected) {
@@ -68,7 +71,7 @@ public:
                     status_ = Status::Connecting;
                     return Action::None;
                 }
-                if (!devmode_ && !windowOpen(nowMs)) return enterOff(Status::Off);
+                if (!devmode_ && !hold_ && !windowOpen(nowMs)) return enterOff(Status::Off);
                 return Action::None;
         }
         return Action::None;
@@ -93,6 +96,7 @@ private:
     Status status_ = Status::Unconfigured;
     bool configured_ = false;
     bool devmode_ = false;
+    bool hold_ = false;
     bool windowSet_ = false;
     uint32_t windowEnd_ = 0;
     uint32_t since_ = 0;

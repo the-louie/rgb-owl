@@ -150,6 +150,13 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   ArduinoJson filter); the highest semver tag wins; drafts never; pre-releases only in debug mode.
   Assets `owl-firmware.bin` + `owl-firmware.bin.sig`. BLE `update_check` → `update_info` event
   (current, latest, newer, msg).
+- Scheduler (T-44): check at boot and every 24 h of uptime (WiFi held on for it, 60 s to come up);
+  a newer signed release installs automatically; `update_check` (app Check/Install) runs it now.
+  Boot status phase 3 follows it (purple checking, green up to date, cyan fill, red failed).
+- Note: any reset within 60 s of a new image's first boot (including unplugging it) rolls it back;
+  the next check simply installs it again.
+- Debug: `GET /api/coredump` returns the last panic's task, PC and backtrace (decode with
+  `xtensa-esp32s3-elf-addr2line -pfiaC -e .pio/build/s3zero-ota/firmware.elf <addrs>`).
 - Rollback detection: the slot to boot is written to NVS before restarting; booting any other slot
   sets `rolled_back`. It stays recorded until the new image is marked valid.
 - **Signed firmware** (T-41): ECDSA P-256 over SHA-256, DER `owl-firmware.bin.sig` next to the image,

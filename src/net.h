@@ -15,6 +15,7 @@ bool configured();                // credentials stored
 bool windowOpen();                // 3-minute post-boot window
 WifiPolicy::Status status();
 void setDevmode(bool on);
+void setHold(bool on);  // keep WiFi on for an update check/install
 bool devmode();
 void saveCredentials(const char* ssid, const char* pass);
 // Saves only if exactly these credentials passed the last startTest(); false otherwise.

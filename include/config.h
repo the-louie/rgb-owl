@@ -20,6 +20,8 @@ constexpr uint32_t SAVE_DELAY_MS = 5000;    // NVS write after settings are stab
 constexpr const char* HOSTNAME = "owl";        // DHCP hostname + mDNS: owl.local
 constexpr uint32_t WIFI_CONNECT_MS = 15000;    // give up joining WiFi after this (boot / test)
 constexpr uint32_t WIFI_WINDOW_MS = 180000;    // WiFi stays up this long after the boot connection
+constexpr uint32_t UPDATE_PERIOD_MS = 24UL * 3600 * 1000;  // update check interval after the boot check
+constexpr uint32_t UPDATE_ONLINE_TIMEOUT_MS = 60000;      // give up an update check if WiFi is not up by then
 constexpr uint32_t ROLLBACK_GRACE_MS = 60000;  // new OTA image must run this long (BLE up) to be kept
 constexpr uint32_t PAIRING_WINDOW_MS = 180000; // new phones may pair only this long after boot
 

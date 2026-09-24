@@ -12,6 +12,8 @@
 #include "net.h"
 #include "signature.h"
 
+#include <esp_core_dump.h>
+
 namespace owl::http {
 
 extern const char INDEX_HTML[] asm("_binary_web_index_html_start");
@@ -110,6 +112,15 @@ static void addRoutes() {
     }));
     web.on("/api/log", HTTP_GET, devOnly([] { web.send(200, "text/plain", log::dump()); }));
     web.on("/api/test", HTTP_POST, devOnly(postTest));
+    // last panic from the core dump partition: task, PC, backtrace (decode with addr2line)
+    web.on("/api/coredump", HTTP_GET, devOnly([] {
+        esp_core_dump_summary_t s;
+        if (esp_core_dump_get_summary(&s) != ESP_OK) return web.send(404, "application/json", "{\"error\":\"no core dump\"}");
+        String j = "{\"task\":\"" + String(s.exc_task) + "\",\"pc\":\"0x" + String(s.exc_pc, HEX) + "\",\"backtrace\":[";
+        for (uint32_t i = 0; i < s.exc_bt_info.depth; ++i) j += (i ? ",\"0x" : "\"0x") + String(s.exc_bt_info.bt[i], HEX) + "\"";
+        j += "],\"corrupted\":" + String(s.exc_bt_info.corrupted ? "true" : "false") + "}";
+        web.send(200, "application/json", j);
+    }));
     // signature self-test: data=<hex>&sig=<hex DER> -> {"valid":bool}
     web.on("/api/verify", HTTP_POST, devOnly([] {
         auto unhex = [](const String& h, std::vector<uint8_t>& out) {

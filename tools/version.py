@@ -4,9 +4,6 @@
 # or "0.0.0-dev+sha" before the first tag. "-dirty" is appended for uncommitted changes.
 import subprocess
 
-Import("projenv")  # noqa: F821  (provided by SCons)
-
-
 def git(*args):
     try:
         return subprocess.check_output(["git", *args], stderr=subprocess.DEVNULL, text=True).strip()
@@ -28,6 +25,10 @@ def owl_version():
     return f"0.0.0-dev+{sha}{dirty}"
 
 
-version = owl_version()
-print(f"OWL_VERSION {version}")
-projenv.Append(CPPDEFINES=[("OWL_VERSION", '\\"%s\\"' % version)])  # noqa: F821
+if __name__ == "__main__":  # plain `python3 tools/version.py` prints the version (tools/owl-dev.sh)
+    print(owl_version())
+else:  # PlatformIO extra_script
+    Import("projenv")  # noqa: F821  (provided by SCons)
+    version = owl_version()
+    print(f"OWL_VERSION {version}")
+    projenv.Append(CPPDEFINES=[("OWL_VERSION", '\\"%s\\"' % version)])  # noqa: F821

@@ -3,7 +3,9 @@
 #include <Preferences.h>
 
 #include "installer.h"
+#include "config.h"
 #include "net.h"
+#include "owl/update_scheduler.h"
 #include "releases.h"
 #include "log.h"
 #include "rollback.h"
@@ -13,6 +15,9 @@
 namespace owl::update {
 
 static String repo;
+static UpdateScheduler scheduler(config::UPDATE_PERIOD_MS, config::UPDATE_ONLINE_TIMEOUT_MS);
+static UpdateScheduler::Outcome outcome = UpdateScheduler::Outcome::Pending;
+static bool installFailed = false;
 static void (*sink)(const char*) = nullptr;
 static installer::State lastState = installer::State::Idle;
 static uint8_t lastPct = 255;
@@ -28,6 +33,7 @@ static void emit(const char* state, int pct, const char* msg) {
 }
 
 void begin() {
+    scheduler.begin(millis());
     Preferences p;
     if (p.begin("update", true)) {
         repo = p.getString("project", "");
@@ -45,9 +51,12 @@ bool installing() {
 uint8_t installPercent() { return installer::percent(); }
 
 bool check() {
-    if (repo.isEmpty() || !net::online()) return false;
-    return releases::start(repo, net::devmode());
+    if (repo.isEmpty() || !net::configured() || scheduler.busy()) return false;
+    scheduler.checkNow(millis());
+    return true;
 }
+
+UpdateStatus bootStatus() { return scheduler.status(); }
 
 static void reportCheck() {
     const releases::Result& r = releases::result();
@@ -68,12 +77,43 @@ bool installFrom(const String& imageUrl, const String& sigUrl) {
     return true;
 }
 
+static void runScheduler() {
+    using A = UpdateScheduler::Action;
+    bool enabled = repo.length() && net::configured();
+    switch (scheduler.tick(millis(), enabled, net::online(), outcome, installFailed)) {
+        case A::HoldWifi:
+            net::setHold(true);
+            break;
+        case A::StartCheck:
+            outcome = UpdateScheduler::Outcome::Pending;
+            if (!releases::start(repo, net::devmode())) outcome = UpdateScheduler::Outcome::Failed;
+            break;
+        case A::StartInstall: {
+            const releases::Result& r = releases::result();
+            installFailed = !installFrom(r.imageUrl, r.sigUrl);
+            break;
+        }
+        case A::ReleaseWifi:
+            net::setHold(false);
+            outcome = UpdateScheduler::Outcome::Pending;
+            installFailed = false;
+            break;
+        case A::None:
+            break;
+    }
+}
+
 void loop() {
     auto rs = releases::state();
     if (rs == releases::State::Done || rs == releases::State::Failed) {
         reportCheck();
-        releases::reset();
+        const releases::Result& r = releases::result();
+        outcome = rs == releases::State::Failed ? UpdateScheduler::Outcome::Failed
+                  : r.newer                     ? UpdateScheduler::Outcome::Newer
+                                                : UpdateScheduler::Outcome::UpToDate;
+        if (outcome != UpdateScheduler::Outcome::Newer) releases::reset();  // keep the URLs for the install
     }
+    runScheduler();
     using S = installer::State;
     S s = installer::state();
     uint8_t p = installer::percent();
@@ -88,6 +128,8 @@ void loop() {
         log::printf("update: failed: %s", installer::error());
         emit("failed", -1, installer::error());
         installer::reset();
+        releases::reset();
+        installFailed = true;
         lastState = S::Idle;
     }
     if (s == S::Done) {
