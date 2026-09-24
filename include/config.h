@@ -18,8 +18,7 @@ constexpr uint32_t SAVE_DELAY_MS = 5000;    // NVS write after settings are stab
 // User-adjustable defaults (brightness, cycle interval, fade, ...) live in lib/owl/src/owl/settings.h.
 
 constexpr const char* HOSTNAME = "owl";        // DHCP hostname + mDNS: owl.local
-constexpr const char* SETUP_AP = "Owl-Setup";  // captive-portal access point (open)
-constexpr uint32_t WIFI_CONNECT_MS = 15000;    // home WiFi attempt before opening the portal
-constexpr uint32_t PORTAL_MS = 300000;         // portal lifetime before retrying home WiFi
+constexpr uint32_t WIFI_CONNECT_MS = 15000;    // give up joining WiFi after this (boot / test)
+constexpr uint32_t WIFI_WINDOW_MS = 180000;    // WiFi stays up this long after the boot connection
 
 }  // namespace owl::config

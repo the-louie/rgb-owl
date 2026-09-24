@@ -2,11 +2,11 @@
 
 #include <Arduino.h>
 #include <NimBLEDevice.h>
-#include <WiFi.h>
 
 #include "config.h"
 #include "leds.h"
 #include "log.h"
+#include "net.h"
 #include "owl/hold.h"
 
 namespace owl::reset {
@@ -19,7 +19,7 @@ void loop() {
     if (!hold.update(digitalRead(config::BOOT_BUTTON_PIN) == LOW, millis())) return;
     log::printf("reset: BOOT held %lu ms, forgetting bonds + WiFi", (unsigned long)config::RESET_HOLD_MS);
     NimBLEDevice::deleteAllBonds();
-    WiFi.disconnect(true, true);  // erase stored credentials
+    net::forgetCredentials();
     for (int i = 0; i < 3; ++i) {  // visible confirmation: three red flashes
         fill_solid(leds::strip, leds::LAYOUT.numLeds, CRGB::Red);
         leds::show();
