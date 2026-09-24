@@ -182,6 +182,13 @@ static void handle(const char* line) {
         if (const char* j = w.finish()) sendEvent(j);
         return sendResult(verb, nullptr);
     }
+    if (!strcmp(verb, "test")) {  // test mode=none|off|solid|pixel|column|row|walk[&r&g&b&index]
+        auto num = [&](const char* k) { const char* v = cmd.get(k); return v ? atoi(v) : 0; };
+        const char* mode = cmd.get("mode");
+        if (!mode || !app::setTest(mode, uint8_t(num("r")), uint8_t(num("g")), uint8_t(num("b")), num("index")))
+            return sendResult(verb, "bad test mode or index");
+        return sendResult(verb, nullptr);
+    }
     if (!strcmp(verb, "time")) {  // time epoch=<unix seconds>&tz=<POSIX TZ>
         const char* epoch = cmd.get("epoch");
         if (!epoch || strtoul(epoch, nullptr, 10) < 1700000000UL) return sendResult(verb, "bad epoch");

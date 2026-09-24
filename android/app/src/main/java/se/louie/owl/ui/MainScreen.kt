@@ -1,6 +1,10 @@
 package se.louie.owl.ui
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,7 +34,8 @@ import se.louie.owl.OwlViewModel
 
 /** On/off, effect grid (outlined = selected, filled = currently shown), auto-cycle. */
 @Composable
-fun MainScreen(vm: OwlViewModel) {
+fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
+    var taps by remember { mutableIntStateOf(0) }
     val state by vm.client.state.collectAsState()
     val effects by vm.client.effects.collectAsState()
     val error by vm.error.collectAsState()
@@ -68,7 +73,11 @@ fun MainScreen(vm: OwlViewModel) {
                 }
             }
         }
-        Text("Firmware ${s.version}", style = MaterialTheme.typography.bodySmall)
+        Text(
+            "Firmware ${s.version}",
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.clickable { if (++taps >= 5) { taps = 0; onSecret() } },
+        )
         error?.let {
             Snackbar(action = { TextButton(onClick = vm::clearError) { Text("OK") } }) { Text(it) }
         }

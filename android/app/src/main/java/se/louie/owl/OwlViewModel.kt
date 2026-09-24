@@ -57,6 +57,8 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
                     "wifi_test" -> _wifiForm.value = _wifiForm.value.finishTest(
                         e.fields["ok"]?.jsonPrimitive?.booleanOrNull == true, e.int("rssi") ?: 0, e.msg,
                     )
+                    "debug" -> _debug.value = _debug.value + e.fields.filterKeys { it != "type" }
+                        .mapValues { it.value.jsonPrimitive.content }
                     "wifi_info" -> _wifiInfo.value = WifiInfo(
                         e.fields["configured"]?.jsonPrimitive?.booleanOrNull == true, e.str("ssid") ?: "",
                         e.str("status") ?: "", e.str("ip") ?: "",
@@ -121,6 +123,19 @@ class OwlViewModel(app: Application) : AndroidViewModel(app) {
     fun wifiReset() {
         _wifiForm.value = WifiForm(ssid = _wifiInfo.value?.ssid ?: "")
     }
+
+    private val _debug = MutableStateFlow<Map<String, String>>(emptyMap())
+    val debug: StateFlow<Map<String, String>> = _debug.asStateFlow()
+
+    fun refreshDebug() {
+        send("debug")
+        send("wifi_info")
+    }
+
+    fun setDevmode(on: Boolean) = send(Protocol.command("devmode", "on" to if (on) 1 else 0))
+
+    fun test(mode: String, index: Int = 0, r: Int = 0, g: Int = 0, b: Int = 0) =
+        send(Protocol.command("test", "mode" to mode, "index" to index, "r" to r, "g" to g, "b" to b))
 
     fun setProject(url: String) = send(Protocol.command("project", "url" to url))
 

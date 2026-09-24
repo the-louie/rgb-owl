@@ -65,14 +65,16 @@ class MainActivity : ComponentActivity() {
 @androidx.compose.runtime.Composable
 private fun OwlTabs(vm: OwlViewModel) {
     var tab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(0) }
+    var dev by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+    val tabs = if (dev) listOf("Owl", "Settings", "Developer") else listOf("Owl", "Settings")
     androidx.compose.material3.Scaffold(
         bottomBar = {
             androidx.compose.material3.NavigationBar {
-                listOf("Owl", "Settings").forEachIndexed { i, label ->
+                tabs.forEachIndexed { i, label ->
                     NavigationBarItem(
                         selected = tab == i,
                         onClick = { tab = i },
-                        icon = { Text(if (i == 0) "🦉" else "⚙") },
+                        icon = { Text(listOf("🦉", "⚙", "🛠")[i]) },
                         label = { Text(label) },
                     )
                 }
@@ -80,7 +82,11 @@ private fun OwlTabs(vm: OwlViewModel) {
         },
     ) { pad ->
         androidx.compose.foundation.layout.Box(Modifier.padding(pad)) {
-            if (tab == 0) MainScreen(vm) else se.louie.owl.ui.SettingsScreen(vm)
+            when (tab) {
+                0 -> MainScreen(vm, onSecret = { dev = true; tab = 2 })
+                1 -> se.louie.owl.ui.SettingsScreen(vm)
+                else -> se.louie.owl.ui.DeveloperScreen(vm)
+            }
         }
     }
 }

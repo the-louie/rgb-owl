@@ -20,6 +20,8 @@ data class OwlState(
     val brightness: Int = 128,
     val speed: Int = 128,
     val hue: Int = 160,
+    val wifi: String = "",
+    val devmode: Boolean = false,
     val version: String = "",
 )
 
