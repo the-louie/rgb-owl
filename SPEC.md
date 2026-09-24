@@ -141,6 +141,13 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   (`OWL_VERSION` from `git describe`).
 - A newer release installs automatically (at boot and in the daily check), or on demand from the app.
 - **Pre-releases** are ignored by the owl unless it is in debug mode (test channel).
+- Installer (T-42): own task on core 0; downloads `<image>.sig` then the image (redirects followed,
+  HTTPS checked against `data/x509_crt_bundle.bin`, regenerated with `tools/gen-crt-bundle.sh`),
+  streams it into the other OTA slot while hashing, verifies the signature, then `Update.end()` and a
+  restart. Events: `{"type":"update","state":"downloading","pct"}` every 5 %, `verifying`, `installed`,
+  `failed` + msg. The LEDs show a cyan fill while downloading. Debug-mode hook: `update_url url=&sig=`.
+- Rollback detection: the slot to boot is written to NVS before restarting; booting any other slot
+  sets `rolled_back`. It stays recorded until the new image is marked valid.
 - **Signed firmware** (T-41): ECDSA P-256 over SHA-256, DER `owl-firmware.bin.sig` next to the image,
   made by `tools/sign-firmware.py` (key: gitignored `keys/owl-signing.pem` or `$OWL_SIGNING_KEY`);
   public key in `include/signing_key.h`; debug-mode `POST /api/verify data=<hex>&sig=<hex>` self-test.

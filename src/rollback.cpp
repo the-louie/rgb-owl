@@ -28,10 +28,12 @@ void begin() {
     char expected[17] = "";
     if (p.begin("ota", false)) {
         p.getString("expect", expected, sizeof(expected));
-        if (expected[0]) p.remove("expect");
+        rolled = expected[0] && strcmp(expected, running->label) != 0;
+        // keep the expectation while the new image is still on probation (it may yet crash);
+        // it is cleared once reported as a rollback or once the image is marked valid
+        if (rolled || (expected[0] && !pending)) p.remove("expect");
         p.end();
     }
-    rolled = expected[0] && strcmp(expected, running->label) != 0;
     log::printf("ota: running %s (%s)%s%s", running->label, pending ? "pending verify" : "valid",
                 rolled ? ", ROLLED BACK from " : "", rolled ? expected : "");
 }
@@ -40,6 +42,11 @@ void loop() {
     if (!pending || !shouldMarkValid(ble::advertising(), millis(), config::ROLLBACK_GRACE_MS)) return;
     if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
         pending = false;
+        Preferences p;
+        if (p.begin("ota", false)) {
+            p.remove("expect");
+            p.end();
+        }
         log::printf("ota: image marked valid");
     }
 }
