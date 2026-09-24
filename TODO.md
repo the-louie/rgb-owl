@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 05, in progress (opened 2026-09-24)
-**Current ticket:** T-35 (`in-progress` — Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb)
-**Last completed:** T-34 (`done` — commit `0f27f7a`)
+**Current ticket:** T-36 (`todo` — App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl))
+**Last completed:** T-35 (`done` — commit `a9043bc`)
 
 ## Conventions
 
@@ -109,7 +109,7 @@ screens work; the night schedule turns the LEDs off.
 | T-32 | New-phone pairing only in the first 3 min after boot | 2h | — | done | Landed in `afff6b1` |
 | T-33 | Auto-cycle effect selection: `cycle` bitmask setting, Cycler skips disabled; tests | 3h | — | done | Landed in `628a76b` |
 | T-34 | Clock (`time epoch=&tz=` verb, NTP in WiFi windows) + night schedule (off between hours) in lib + tests | 4h | T-28 | done | Landed in `0f27f7a` |
-| T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | in-progress | |
+| T-35 | Crash info: last panic/WDT reason + time in NVS → `/api/debug` + `debug` verb | 1h | — | done | Landed in `a9043bc` |
 | T-36 | App Settings: sliders, effect toggles, night schedule, GitHub project URL (`project` setting on the owl) | 4h | T-33, T-34 | todo | |
 | T-37 | App WiFi section: owl scan list + manual SSID, password, Test, Save gated on a pass | 3h | T-29, T-36 | todo | |
 | T-38 | App Developer screen (hidden): debug toggle, IP, debug fields, test patterns | 3h | T-30, T-35 | todo | |
