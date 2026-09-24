@@ -6,7 +6,7 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 06, in progress (opened 2026-09-24)
-**Current ticket:** T-48 (`todo` — GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`))
+**Current ticket:** T-48 (`in-progress` — GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`))
 **Last completed:** T-47 (`done` — commit `1160c5d`)
 
 ## Conventions
@@ -133,7 +133,7 @@ events; an unsigned or tampered one is refused; a crash-looping image rolls back
 | T-45 | App firmware section: version, latest release, Check, Install, progress | 3h | T-44 | done | Landed in `315ba5e` |
 | T-46 | APK release signing: keystore in gitignored `keys/`, `tools/build-app.sh release` | 1h | — | done | CI secret later; Landed in `2e0aaba` |
 | T-47 | App self-update: latest release `owl-app.apk`, versionCode compare, download + install prompt | 3h | T-46 | done | Landed in `1160c5d` |
-| T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | todo | runs once the repo exists |
+| T-48 | GitHub Actions: test + build on push; on a tag, sign firmware + APK and publish the release (`tools/release.sh`) | 3h | T-41, T-46 | in-progress | runs once the repo exists |
 | T-49 | Scrub the OTA password from history, create the public repo, push, set CI secrets, first release | 2h | T-48 | todo | **needs the user:** `gh auth login` + repo name |
 
 ## Backlog
