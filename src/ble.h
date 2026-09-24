@@ -12,6 +12,7 @@ constexpr const char* EVENT_UUID = "4f574c00-8a1b-4c2e-9d3f-2b1a6c7e0004";    //
 constexpr const char* EFFECTS_UUID = "4f574c00-8a1b-4c2e-9d3f-2b1a6c7e0005";  // read: JSON array
 
 void begin();
+int bondCount();
 void loop();  // runs queued commands and pushes state changes (main loop only)
 // Runs one command line as if written to the command characteristic (debug: POST /api/cmd).
 // Events are also logged while debug mode is on.

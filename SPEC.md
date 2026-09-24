@@ -55,8 +55,8 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 
 ## Behaviour
 
-- Boot: column-walk test pattern lights LEDs one by one in wiring order (40 ms each),
-  hue per column, to check `layout.h` against the hardware.
+- Boot: status phases (SPEC v2 §Boot status); the column walk (LEDs one by one in wiring order, 40 ms each,
+  hue per column) is the `walk` test pattern for checking `layout.h`.
 - Auto-cycle through effects, fixed order, every 60 s, 2 s crossfade (both adjustable).
 - Power limit: FastLED `setMaxPowerInVoltsAndMilliamps(5, 4000)` (62 LEDs × 60 mA = 3.7 A; 10 A PSU).
 - Settings persisted to NVS (Preferences), written ~5 s after last change.

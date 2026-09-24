@@ -7,6 +7,9 @@
 #include "effect.h"
 #include "effects/effects.h"
 #include "leds.h"
+#include "ble.h"
+#include "net.h"
+#include "owl/boot_status.h"
 #include "owl/cycle.h"
 #include "owl/debounce.h"
 #include "owl/stats.h"
@@ -25,7 +28,9 @@ static Cycler cycler(EFFECTS.size(), cfg.intervalS * 1000UL, cfg.fadeMs);
 static CRGB fadeBuf[leds::LAYOUT.numLeds];
 static Canvas canvas{leds::strip};
 static Canvas fadeCanvas{fadeBuf};
-static bool walking = true;
+static bool booting = true;  // boot status phases are shown until done
+static bool statusStarted = false;
+static BootStatus bootStatus;
 static FrameStats stats;
 
 enum class Test { None, Off, Solid, Pixel, Column, Row, Walk };
@@ -74,6 +79,27 @@ static void renderTest(uint32_t now) {
         }
         default: break;
     }
+}
+
+// Draws one boot status visual on the whole owl (SPEC v2 §Boot status).
+static void renderStatus(const Visual& v, uint32_t now) {
+    const auto& L = leds::LAYOUT;
+    CRGB c(v.r, v.g, v.b);
+    switch (v.kind) {
+        case Visual::Solid: break;
+        case Visual::Pulse: c.nscale8(uint8_t(40 + scale8(sin8(uint8_t(now * 256 / 1000)), 215))); break;
+        case Visual::Blink: if ((now / 100) % 2) c = CRGB::Black; break;
+        case Visual::Fill: {
+            int lit = (L.height * v.fill + 99) / 100;  // rows lit from the bottom
+            for (int i = 0; i < L.numLeds; ++i) {
+                CRGB px = c;
+                if (L.pos[i].y >= lit) px.nscale8(25);
+                leds::strip[i] = px;
+            }
+            return;
+        }
+    }
+    fill_solid(leds::strip, L.numLeds, c);
 }
 
 static void renderEffects(uint32_t dt) {
@@ -128,11 +154,19 @@ void loop() {
     if (!pacer.due(now)) return;
     uint32_t dt = now - lastMs;
     lastMs = now;
-    if (walking && !renderWalk(now - bootMs)) {
-        walking = false;
-        EFFECTS[cycler.current()].start();
+    if (!statusStarted) {  // first loop: BLE and WiFi are initialised by now
+        statusStarted = true;
+        bootStatus.begin(now, ble::bondCount() > 0);
     }
-    if (!walking) {
+    if (booting && test == Test::None) {
+        renderStatus(bootStatus.update(now, net::status(), UpdateStatus::None, 0), now);
+        if (bootStatus.done()) {
+            booting = false;
+            EFFECTS[cycler.current()].start();
+            log::printf("owl: boot status done after %lu ms", (unsigned long)(now - bootMs));
+        }
+    } else {
+        booting = false;
         if (test != Test::None) {
             renderTest(now);
         } else if (cfg.on) {
@@ -175,7 +209,6 @@ bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index) {
     testIndex = index;
     testColor = (r | g | b) ? CRGB(r, g, b) : CRGB(255, 255, 255);
     testStartMs = millis();
-    walking = false;
     if (t == Test::None) EFFECTS[cycler.current()].start();
     log::printf("test: %s index=%d rgb=%u,%u,%u", mode, index, testColor.r, testColor.g, testColor.b);
     return true;
@@ -192,7 +225,7 @@ void appendDebug(String& j) {
              "\"version\":\"%s\",\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
              "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
              "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
-             "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_walk\":%s,"
+             "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_status\":%s,"
              "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
              "\"power_limit_ma\":%lu,\"correction\":\"%06lx\",\"gamma\":%.2f",
              OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
@@ -200,7 +233,7 @@ void appendDebug(String& j) {
              unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
              (unsigned long)stats.fps(), (unsigned long)stats.maxFrameUs(), L.numLeds, L.width,
              L.height, config::LED_PIN, unsigned(FASTLED_VERSION), EFFECTS[cycler.current()].name(),
-             TEST_NAMES[int(test)], walking ? "true" : "false", cfg.brightness, limited,
+             TEST_NAMES[int(test)], booting ? "true" : "false", cfg.brightness, limited,
              (unsigned long)(uint64_t(mW) * limited / 255 / config::LED_VOLTS),
              (unsigned long)config::LED_MAX_MILLIAMPS, (unsigned long)leds::correction(),
              double(leds::gamma()));
