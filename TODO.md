@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 05, in progress (opened 2026-09-24)
-**Current ticket:** T-28 (`in-progress` — WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests)
-**Last completed:** T-26 (`done` — commit `f748d28`)
+**Current ticket:** T-30 (`todo` — Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted)
+**Last completed:** T-28 (`done` — commit `a17eb98`)
 
 ## Conventions
 
@@ -102,7 +102,7 @@ screens work; the night schedule turns the LEDs off.
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-28 | WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests | 4h | — | in-progress | SPEC v2 §WiFi |
+| T-28 | WiFi v2 core: drop WiFiManager/portal; creds in own NVS; boot connect (15 s) → 3 min window → off; policy FSM in lib + tests | 4h | — | done | SPEC v2 §WiFi; Landed in `a17eb98` |
 | T-29 | BLE WiFi verbs: `wifi_scan`, `wifi_test` (≤15 s, reason), `wifi_save` (only after a passing test), `wifi_forget`; WiFi fields in state | 4h | T-28 | todo | |
 | T-30 | Debug mode: `devmode` verb + `POST /api/devmode` (OTA password); window serves only `/api/debug` + `/api/devmode`; debug mode = full HTTP + ArduinoOTA; not persisted | 3h | T-28 | todo | |
 | T-31 | Boot status LED phases (BLE, WiFi, update placeholder); phase sequencer in lib + tests; boot walk removed (test pattern stays) | 3h | T-28 | todo | SPEC v2 §Boot status |
