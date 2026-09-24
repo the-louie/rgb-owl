@@ -272,6 +272,8 @@ void execute(const char* line) { handle(line); }
 
 int bondCount() { return NimBLEDevice::getNumBonds(); }
 
+bool advertising() { return server && NimBLEDevice::getAdvertising()->isAdvertising(); }
+
 void loop() {
     char line[Command::MAX_LEN + 1];
     while (xQueueReceive(commands, line, 0) == pdTRUE) handle(line);

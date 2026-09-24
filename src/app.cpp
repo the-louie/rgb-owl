@@ -10,6 +10,7 @@
 #include "ble.h"
 #include "clock.h"
 #include "crash.h"
+#include "rollback.h"
 #include "net.h"
 #include "owl/boot_status.h"
 #include "owl/cycle.h"
@@ -234,13 +235,13 @@ void appendDebug(String& j) {
         leds::output, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
     char buf[768];
     snprintf(buf, sizeof(buf),
-             "\"version\":\"%s\",\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
+             "\"version\":\"%s\",\"ota_state\":\"%s\",\"rolled_back\":%s,\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
              "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
              "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
              "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_status\":%s,"
              "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
              "\"power_limit_ma\":%lu,\"last_crash\":\"%s\",\"last_crash_time\":%lu,\"crashes\":%lu,\"correction\":\"%06lx\",\"gamma\":%.2f",
-             OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), crash::resetReason(),
+             OWL_VERSION, rollback::state(), rollback::rolledBack() ? "true" : "false", __DATE__, __TIME__, (unsigned long)(millis() / 1000), crash::resetReason(),
              unsigned(ESP.getFreeHeap()), unsigned(ESP.getMinFreeHeap()),
              unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
              (unsigned long)stats.fps(), (unsigned long)stats.maxFrameUs(), L.numLeds, L.width,
