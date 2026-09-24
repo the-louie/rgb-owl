@@ -137,6 +137,9 @@ Installed toolchain (user-level, verified 2026-09-23):
 
 ## Reference documentation index (`__docs/`, gitignored)
 
+`__docs` and `dist` are symlinks to the file server (`/mnt/backup/owl/`, NFS) because the dev host
+is short on disk. Throwaway experiments go to `/mnt/backup/owl/scratch-experiments/`.
+
 Load these into context only when needed. If `__docs/` is missing, re-download from the URLs.
 
 | File | Load when | Source |
@@ -232,4 +235,5 @@ Types: DECISION, EVENT, OPEN, CLOSED.
 2026-09-24 | DECISION | Safety: pre-release channel (ignored unless debug mode); signed firmware for GitHub updates (debug uploads may be unsigned); GitHub Actions CI builds+signs+publishes on tag; crash info in NVS
 2026-09-24 | DECISION | APK keystore + firmware signing key live as CI secrets; user keeps offline backups
 2026-09-24 | DECISION | New-phone pairing only in first 3 min after boot
+2026-09-24 | EVENT    | Disk: __docs + dist moved to /mnt/backup/owl (symlinked), scratch experiments (474 MB) offloaded; root 20 GB free
 ```
