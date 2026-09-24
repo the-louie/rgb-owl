@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 04, in progress (opened 2026-09-24)
-**Current ticket:** T-19 (`in-progress` — Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN)
-**Last completed:** T-18 (`done` — commit `893b1e6`)
+**Current ticket:** T-20 (`todo` — `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap)
+**Last completed:** T-19 (`done` — commit `5a0f77d`)
 
 ## Conventions
 
@@ -82,7 +82,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 
 | ID | Title | Est | Deps | Status | Notes |
 |---|---|---|---|---|---|
-| T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | in-progress | SPEC v2 §Release |
+| T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | done | SPEC v2 §Release; Landed in `5a0f77d` |
 | T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | todo | |
 | T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | todo | SPEC v2 §BLE |
 | T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | todo | check NimBLE version vs core 2.0.17 |
