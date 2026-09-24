@@ -154,8 +154,8 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   `failed` + msg. The LEDs show a cyan fill while downloading. Debug-mode hook: `update_url url=&sig=`.
 - Release lookup (T-43): `GET api.github.com/repos/<project>/releases?per_page=10` (anonymous, HTTP/1.0,
   ArduinoJson filter); the highest semver tag wins; drafts never; pre-releases only in debug mode.
-  Assets `owl-firmware-<version>.bin` + `.sig` (since 1.0.1; 1.0.0 only knows `owl-firmware.bin` + `.sig`,
-  which releases still carry). BLE `update_check` → `update_info` event
+  Assets `owl-firmware-<version>.bin` + `.sig` (since 1.0.1; firmware and app still accept the unversioned
+  names that 1.0.0 used, but releases no longer carry them). BLE `update_check` → `update_info` event
   (current, latest, newer, msg).
 - Scheduler (T-44): check at boot and every 24 h of uptime (WiFi held on for it, 60 s to come up);
   a newer signed release installs automatically; `update_check` (app Check/Install) runs it now.

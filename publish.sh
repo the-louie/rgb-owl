@@ -7,7 +7,7 @@
 #                               (needs the repo secrets listed in .github/workflows/ci.yml)
 #
 # Needs: clean tree on main, secrets.ini, keys/ (signing keys), `gh auth login` (local mode).
-# Assets: owl-firmware-V.bin(.sig), owl-s3zero-merged-V.bin, owl-app-V.apk (+ v1.0.0 copies; tools/release.sh).
+# Assets: owl-firmware-V.bin(.sig), owl-s3zero-merged-V.bin, owl-app-V.apk (see tools/release.sh).
 set -euo pipefail
 cd "$(dirname "$0")"
 

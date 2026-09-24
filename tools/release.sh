@@ -3,8 +3,7 @@
 #   owl-firmware-V.bin (+ .sig)   OTA image for the owl's updater, signed (tools/sign-firmware.py)
 #   owl-s3zero-merged-V.bin       full flash image for USB / the web flasher (address 0x0)
 #   owl-app-V.apk                 release-signed Android app
-#   + owl-firmware.bin(.sig), owl-app.apk: unversioned copies for owls/apps still on v1.0.0,
-#     which only know those names (drop once nothing runs 1.0.0 - see TODO.md backlog)
+# (1.0.1/1.0.2 also carried unversioned copies for v1.0.0; dropped 2026-09-24, nothing runs 1.0.0)
 # Local: keys/ + secrets.ini. CI: the same via env (see .github/workflows/ci.yml).
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -24,11 +23,6 @@ pio pkg exec --package tool-esptoolpy -- esptool.py --chip esp32s3 merge_bin -o 
 
 tools/build-app.sh release > /dev/null
 cp "dist/owl-app-$v-release.apk" "$out/owl-app-$v.apk"
-
-# v1.0.0 compatibility copies (same bytes, same signature)
-cp "$out/owl-firmware-$v.bin" "$out/owl-firmware.bin"
-cp "$out/owl-firmware-$v.bin.sig" "$out/owl-firmware.bin.sig"
-cp "$out/owl-app-$v.apk" "$out/owl-app.apk"
 
 echo "$v" > "$out/VERSION"
 ls -l "$out"
