@@ -183,18 +183,18 @@ bool setTest(const char* mode, uint8_t r, uint8_t g, uint8_t b, int index) {
 
 void appendDebug(String& j) {
     const auto& L = leds::LAYOUT;
-    // strip holds unscaled colours; FastLED applies brightness + power limit at show()
-    uint32_t mW = calculate_unscaled_power_mW(leds::strip, L.numLeds);
+    // output holds the gamma-mapped frame; FastLED applies correction, brightness + power limit at show()
+    uint32_t mW = calculate_unscaled_power_mW(leds::output, L.numLeds);
     uint8_t limited = calculate_max_brightness_for_power_mW(
-        leds::strip, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
-    char buf[512];
+        leds::output, L.numLeds, cfg.brightness, config::LED_VOLTS * config::LED_MAX_MILLIAMPS);
+    char buf[640];
     snprintf(buf, sizeof(buf),
              "\"version\":\"%s\",\"build\":\"%s %s\",\"uptime_s\":%lu,\"reset_reason\":\"%s\","
              "\"heap_free\":%u,\"heap_min\":%u,\"psram_free\":%u,\"cpu_mhz\":%u,"
              "\"fps\":%lu,\"show_max_us\":%lu,\"leds\":%u,\"grid\":\"%ux%u\",\"data_pin\":%u,"
              "\"fastled\":%u,\"effect\":\"%s\",\"test\":\"%s\",\"boot_walk\":%s,"
              "\"brightness\":%u,\"brightness_after_power_limit\":%u,\"est_ma\":%lu,"
-             "\"power_limit_ma\":%lu",
+             "\"power_limit_ma\":%lu,\"correction\":\"%06lx\",\"gamma\":%.2f",
              OWL_VERSION, __DATE__, __TIME__, (unsigned long)(millis() / 1000), resetReason(),
              unsigned(ESP.getFreeHeap()), unsigned(ESP.getMinFreeHeap()),
              unsigned(ESP.getFreePsram()), unsigned(ESP.getCpuFreqMHz()),
@@ -202,7 +202,8 @@ void appendDebug(String& j) {
              L.height, config::LED_PIN, unsigned(FASTLED_VERSION), EFFECTS[cycler.current()].name(),
              TEST_NAMES[int(test)], walking ? "true" : "false", cfg.brightness, limited,
              (unsigned long)(uint64_t(mW) * limited / 255 / config::LED_VOLTS),
-             (unsigned long)config::LED_MAX_MILLIAMPS);
+             (unsigned long)config::LED_MAX_MILLIAMPS, (unsigned long)leds::correction(),
+             double(leds::gamma()));
     j += buf;
 }
 

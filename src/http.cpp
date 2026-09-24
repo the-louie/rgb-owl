@@ -94,6 +94,16 @@ static void addRoutes() {
     });
     web.on("/api/log", HTTP_GET, [] { web.send(200, "text/plain", log::dump()); });
     web.on("/api/test", HTTP_POST, postTest);
+    // colour tuning: correction=RRGGBB (hex) & gamma=1.0..3.0; not persisted
+    web.on("/api/color", HTTP_POST, [] {
+        uint32_t corr = web.hasArg("correction") ? strtoul(web.arg("correction").c_str(), nullptr, 16)
+                                                 : leds::correction();
+        float g = web.hasArg("gamma") ? web.arg("gamma").toFloat() : leds::gamma();
+        if (g < 1.0f || g > 3.0f) return sendError("gamma must be 1.0-3.0");
+        leds::setColor(corr, g);
+        log::printf("color: correction %06lx gamma %.2f", (unsigned long)corr, double(g));
+        getDebug();
+    });
     web.on("/api/reboot", HTTP_POST, [] {
         log::printf("reboot requested over HTTP");
         web.send(200, "application/json", "{\"ok\":true}");

@@ -36,7 +36,7 @@ in `SPEC.md`, and it is the source of truth for behaviour.
 | LED data pin | **GPIO1** | See pin rules below |
 | LED type | WS2812B, 5 V, GRB | Interview 2026-09-23 |
 | Level shifting | None. 3.3 V goes directly to DIN | User choice; accepted risk |
-| LED power | Separate 5 V 10 A PSU; firmware current cap 8000 mA | Interview |
+| LED power | Separate 5 V 10 A PSU; firmware current cap 4000 mA (62 LEDs) | Interview 2026-09-24 |
 | Layout | Compile-time `include/layout.h` | Interview |
 | Stack | PlatformIO + Arduino + FastLED | Interview; build verified |
 | App | Android only, Kotlin + Jetpack Compose, minSdk 31, in `android/` | Interview 2026-09-24 |

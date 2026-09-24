@@ -58,7 +58,7 @@ Palette bias: pastel (desaturated) colours where the effect allows.
 - Boot: column-walk test pattern lights LEDs one by one in wiring order (40 ms each),
   hue per column, to check `layout.h` against the hardware.
 - Auto-cycle through effects, fixed order, every 60 s, 2 s crossfade (both adjustable).
-- Power limit: FastLED `setMaxPowerInVoltsAndMilliamps(5, 8000)` (configurable; 10 A PSU).
+- Power limit: FastLED `setMaxPowerInVoltsAndMilliamps(5, 4000)` (62 LEDs × 60 mA = 3.7 A; 10 A PSU).
 - Settings persisted to NVS (Preferences), written ~5 s after last change.
 
 ## Connectivity — v2: Android app over Bluetooth (planned 2026-09-24, Sprints 04–06)
@@ -157,6 +157,7 @@ Then effects start, 3 s after the update check finishes (typically 5–15 s afte
   - `GET /api/log`: last 4 KB of the firmware log (same lines as USB serial)
   - `POST /api/test`: `mode=none|off|solid|pixel|column|row|walk`, optional `r,g,b` and `index`
     (pixel = strip index, column = physical column 0 = rightmost, row = grid y); overrides effects until `none`
+  - `POST /api/color`: `correction=RRGGBB&gamma=1.0..3.0` (live tuning, not persisted; bake into `config.h`)
   - `POST /api/reboot`
 - OTA: ArduinoOTA (`pio run -e s3zero-ota -t upload`, espota to `owl.local`) and `.bin` upload in
   the web UI (`POST /update`, multipart, `password` field before the file). Both require the OTA
