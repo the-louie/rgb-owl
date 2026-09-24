@@ -6,8 +6,8 @@ Spec: [SPEC.md](SPEC.md). Agent rules and ledger: [AGENTS.md](AGENTS.md).
 ## Current position
 
 **Active sprint:** Sprint 04, in progress (opened 2026-09-24)
-**Current ticket:** T-22 (`in-progress` — NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set`)
-**Last completed:** T-27 (`done` — commit `3b6db73`)
+**Current ticket:** T-23 (`todo` — BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested))
+**Last completed:** T-22 (`done` — commit `699ad3c`)
 
 ## Conventions
 
@@ -85,7 +85,7 @@ pairs with the PIN, sees the owl's state, and switches effect/on-off; after an a
 | T-19 | Secrets to gitignored `secrets.ini` (`extra_configs`) + committed `secrets.ini.example`; OTA password + BLE PIN | 1h | — | done | SPEC v2 §Release; Landed in `5a0f77d` |
 | T-20 | `OWL_VERSION` from `git describe` into build + `/api/debug`; enable the 2 MB PSRAM (qio_qspi) for BLE+WiFi+TLS heap | 2h | — | done | Landed in `637f569` |
 | T-21 | Protocol lib: `verb k=v&k=v` URL-decoded parser, JSON event builder, semver compare + native tests | 3h | — | done | SPEC v2 §BLE; Landed in `faf35bf` |
-| T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | in-progress | check NimBLE version vs core 2.0.17 |
+| T-22 | NimBLE GATT server: `state`/`command`/`event`/`effects`, bonding with static passkey, auth-required; settings verbs via `app::set` | 4h | T-19, T-21 | done | check NimBLE version vs core 2.0.17; Landed in `699ad3c` |
 | T-23 | BOOT held 5 s → clear bonds + WiFi creds (hold detection in lib, tested) | 2h | T-22 | todo | |
 | T-27 | Power cap 4000 mA + FastLED colour correction/gamma hook (tuned later on hardware) | 1h | — | done | SPEC v2 §Improvements; Landed in `3b6db73` |
 | T-24 | Android project `android/`: wrapper, Compose, minSdk 31, JVM tests, `tools/build-app.sh` → `dist/owl-app.apk`; gate docs | 2h | — | todo | memory-limited Gradle settings |
