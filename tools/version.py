@@ -1,5 +1,6 @@
 # PlatformIO post-script: defines OWL_VERSION for project sources only.
-# Tag vX.Y.Z on HEAD -> "X.Y.Z"; otherwise "X.Y.Z-dev.N+sha" (N commits after the last tag),
+# Tag vX.Y.Z on HEAD -> "X.Y.Z"; otherwise "X.Y.(Z+1)-dev.N+sha" (N commits after the last tag,
+# so a dev build sorts after the release it builds on and before the next one),
 # or "0.0.0-dev+sha" before the first tag. "-dirty" is appended for uncommitted changes.
 import subprocess
 
@@ -20,7 +21,10 @@ def owl_version():
     if desc:
         tag, n, _ = desc.rsplit("-", 2)
         base = tag[1:]
-        return (base if n == "0" else f"{base}-dev.{n}+{sha}") + dirty
+        if n == "0":
+            return base + dirty
+        major, minor, patch = base.split("-")[0].split(".")
+        return f"{major}.{minor}.{int(patch) + 1}-dev.{n}+{sha}{dirty}"
     return f"0.0.0-dev+{sha}{dirty}"
 
 
