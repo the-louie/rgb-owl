@@ -5,6 +5,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonPrimitive
 
 /** Owl state as sent on the `state` characteristic (firmware: src/ble.cpp stateJson). */
@@ -42,7 +43,10 @@ data class OwlConfig(
 fun formatMinutes(m: Int): String = "%02d:%02d".format((m / 60) % 24, m % 60)
 
 /** Reply on the `event` characteristic. `fields` keeps the whole object for event types added later. */
-data class OwlEvent(val type: String, val verb: String?, val msg: String?, val fields: JsonObject)
+data class OwlEvent(val type: String, val verb: String?, val msg: String?, val fields: JsonObject) {
+    fun str(key: String): String? = fields[key]?.jsonPrimitive?.contentOrNull
+    fun int(key: String): Int? = fields[key]?.jsonPrimitive?.intOrNull
+}
 
 object Protocol {
     private val json = Json { ignoreUnknownKeys = true }

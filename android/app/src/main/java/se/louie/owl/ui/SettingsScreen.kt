@@ -81,6 +81,9 @@ fun SettingsScreen(vm: OwlViewModel) {
             }
         }
 
+        Section("WiFi")
+        WifiSection(vm)
+
         Section("Firmware updates")
         var url by remember(project) { mutableStateOf(project ?: "") }
         OutlinedTextField(
