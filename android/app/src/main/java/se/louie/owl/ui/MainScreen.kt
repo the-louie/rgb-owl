@@ -1,7 +1,18 @@
 package se.louie.owl.ui
 
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.runtime.mutableIntStateOf
@@ -42,6 +53,11 @@ fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
     val effects by vm.client.effects.collectAsState()
     val error by vm.error.collectAsState()
     val s = state ?: return
+    val fadeProgress = remember { Animatable(0f) }
+    LaunchedEffect(s.next) {
+        fadeProgress.snapTo(0f)
+        if (s.next >= 0) fadeProgress.animateTo(1f, tween(durationMillis = s.fade.coerceIn(0, 10_000), easing = LinearEasing))
+    }
 
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -62,24 +78,25 @@ fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
             modifier = Modifier.weight(1f),
         ) {
             itemsIndexed(effects) { i, name ->
-                // Follow the owl's crossfade: the effect it fades to fades in over the same time,
-                // the previous one fades out (s.next is the fade target, -1 when not fading).
-                val shown = i == (if (s.next >= 0) s.next else s.current)
-                val bg by animateColorAsState(
-                    if (shown) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainerHighest,
-                    animationSpec = tween(durationMillis = s.fade.coerceIn(0, 10_000)),
-                    label = "effect $i",
-                )
+                // Each button doubles as a progress bar for the owl's crossfade (see effectFill).
+                val fill = effectFill(i, s.current, s.next, fadeProgress.value)
+                val label = name.replaceFirstChar { it.uppercase() }
                 Card(
                     onClick = { vm.set("effect" to i) },
-                    colors = CardDefaults.cardColors(containerColor = bg),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerHighest),
                     border = if (i == s.effect) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
                 ) {
-                    Text(
-                        name.replaceFirstChar { it.uppercase() },
-                        Modifier.fillMaxWidth().padding(vertical = 20.dp),
-                        textAlign = TextAlign.Center,
-                    )
+                    Box(Modifier.fillMaxWidth()) {
+                        EffectLabel(label, MaterialTheme.colorScheme.onSurface)
+                        if (fill != null) {
+                            // primary-coloured part, with the label in white clipped to the same span
+                            Box(
+                                Modifier.matchParentSize()
+                                    .clip(SpanShape(fill.first, fill.second))
+                                    .background(MaterialTheme.colorScheme.primary),
+                            ) { EffectLabel(label, MaterialTheme.colorScheme.onPrimary) }
+                        }
+                    }
                 }
             }
         }
@@ -93,4 +110,18 @@ fun MainScreen(vm: OwlViewModel, onSecret: () -> Unit = {}) {
         }
         Spacer(Modifier.height(4.dp))
     }
+}
+
+@Composable
+private fun EffectLabel(text: String, color: androidx.compose.ui.graphics.Color) = Text(
+    text,
+    Modifier.fillMaxWidth().padding(vertical = 20.dp),
+    textAlign = TextAlign.Center,
+    color = color,
+)
+
+/** Rectangle covering [start, end] of the width (fractions). */
+private class SpanShape(private val start: Float, private val end: Float) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density) =
+        Outline.Rectangle(Rect(size.width * start, 0f, size.width * end, size.height))
 }
